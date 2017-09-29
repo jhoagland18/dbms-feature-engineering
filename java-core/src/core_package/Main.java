@@ -1,13 +1,15 @@
 package core_package;
 
+//Created by Gayatri Krishnan and Jackson Hoagland on 9/29/2017
+
 public class Main {
 	
 	public static void main(String args[]) {
 		
-		Table p = new Table("name", );
-		p.addAttribute("purchase_ID", true, ID);
-		Table cl = new Table("name", );
-		p.addAttribute("purchase_ID", true, ID);
+		Table p = new Table("name"); 
+		p.addAttribute("purchase_ID", true);
+		Table cl = new Table("name");
+		p.addAttribute("purchase_ID", true);
 		
 		
 		
