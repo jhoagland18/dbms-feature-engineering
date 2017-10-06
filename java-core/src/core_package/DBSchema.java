@@ -18,6 +18,16 @@ public class DBSchema {
 
 	public void addRelationship(Table p, Table cl, String string, String string2) {
 		// TODO Auto-generated method stub
-		
+	
+	}
+	
+	
+	public Path finishPath(ArrayList<Table> current, int max_length) {
+		for (int i=tables.size(); i>0; i++) {
+			ArrayList<Table> current2 = new ArrayList<Table>();
+			current2.equals(current);
+			
+		}
+		return finishPath(current, max_length);
 	}
 }
