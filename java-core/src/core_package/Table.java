@@ -6,6 +6,7 @@ public class Table {
 	private String name;
 	private boolean isPrimaryKeySet=false;
 	private ArrayList<Attribute> attributes;
+	private ArrayList<Relationship> relationships;
 	
 	public Table(String name) {
 		this.name=name;
@@ -23,6 +24,11 @@ public class Table {
 			attributes.add(a);
 			return 1;
 		}
+	}
+	
+	public void addRelationship(Table targetTable, String attName) {
+		Relationship r = new Relationship(targetTable, attName);
+		relationships.add(r);
 	}
 	
 	public String getTableName() {

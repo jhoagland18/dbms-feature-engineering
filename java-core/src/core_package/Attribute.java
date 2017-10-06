@@ -2,7 +2,7 @@ package core_package;
 
 import java.util.ArrayList;
 
-public class Attribute extends ArrayList {
+public class Attribute{
 	
 	private String name;
 
