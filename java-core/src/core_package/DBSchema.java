@@ -8,6 +8,16 @@ public class DBSchema {
 	ArrayList<Relationship> relationships;
 	
 	public DBSchema() {
-		tables.
+		
+	}
+
+	public void addTable(Table p) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void addRelationship(Table p, Table cl, String string, String string2) {
+		// TODO Auto-generated method stub
+		
 	}
 }

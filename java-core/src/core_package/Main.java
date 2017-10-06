@@ -18,7 +18,7 @@ public class Main {
 		sc.addTable(cl);
 		sc.addRelationship(p,cl,"purchaseID", "clientID");
 		
-		Table featureTable = attributeGenerate (sc, p, "target-attribute");
+		//Table featureTable = attributeGenerate (sc, p, "target-attribute");
 	}
 
 }
