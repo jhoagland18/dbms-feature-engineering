@@ -6,19 +6,20 @@ public class Main {
 	
 	public static void main(String args[]) {
 		
-		Table p = new Table("name"); 
-		p.addAttribute("purchase_ID", true);
-		Table cl = new Table("name");
-		p.addAttribute("purchase_ID", true);
+		Table route = new Table("route"); 
+		route.addAttribute("route_ID", true);
+		Table flight = new Table ("flight");
+		flight.addAttribute("flight_ID", true);
 		
 		
-		
+		//route.addRelationship(flight,"flight_ID");
 		DBSchema sc = new DBSchema();
-		sc.addTable(p);
-		sc.addTable(cl);
-		sc.addRelationship(p,cl,"purchaseID", "clientID");
-		
+		sc.addTable(flight);
+		sc.addTable(route);
+		sc.createRelationship(route,  flight,  new Attribute("route_ID", true, route), new Attribute("route_ID", false, flight));
+		sc.buildPaths(null, route, 3);
 		//Table featureTable = attributeGenerate (sc, p, "target-attribute");
+		sc.printPaths();
 	}
 
 }
