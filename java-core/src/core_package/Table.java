@@ -7,6 +7,8 @@ public class Table {
 	private boolean isPrimaryKeySet=false;
 	private ArrayList<Attribute> attributes;
 	private ArrayList<Relationship> relationships;
+	private ArrayList<Path> paths;
+	
 	
 	public Table(String name) {
 		this.name=name;
@@ -30,6 +32,7 @@ public class Table {
 	public void addRelationship (Relationship rel) {
 		//Relationship rel = new Relationship(targetTable, attribute);
 		relationships.add(rel);
+		System.out.println("Adding relationship for table: " + name);
 	}
 	
 	public String getTableName() {
@@ -42,6 +45,18 @@ public class Table {
 	
 	public ArrayList<Relationship> getRelationships () {
 		return relationships;
+	}
+	
+	public String toString() {
+		return name;
+	}
+	public Attribute getAttribute(String name) {
+		for (int i = 0; i<attributes.size(); i++) {
+			if (attributes.get(i).equals(name)) {
+				return attributes.get(i);
+			}
+		}
+		return null;
 	}
 
 

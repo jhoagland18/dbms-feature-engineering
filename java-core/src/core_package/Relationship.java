@@ -6,12 +6,15 @@ public class Relationship {
 	private Table table2;
 	private Attribute attribute1;
 	private Attribute attribute2;
+	//store Relationship Types
 	
 	public Relationship (Table a, Table b, Attribute att1, Attribute att2) {
 		table1=a;
 		table2=b;
-		attribute2=att2;
+
 		attribute1=att1;	
+		attribute2=att2;
+		
 		addRelationshipsToTables();
 	}
 	
@@ -24,6 +27,8 @@ public class Relationship {
 	public void addRelationshipsToTables() {
 		table1.addRelationship(this);
 		table2.addRelationship(this);
+		System.out.println(table1.toString());
+		System.out.println(table2.toString());
 	}
 	public boolean hasTable(Table t) {
 		return (table1==t || table2==t) ? true : false;
