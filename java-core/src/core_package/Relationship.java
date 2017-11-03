@@ -27,10 +27,14 @@ public class Relationship {
 	public void addRelationshipsToTables() {
 		table1.addRelationship(this);
 		table2.addRelationship(this);
-		System.out.println(table1.toString());
-		System.out.println(table2.toString());
+		//System.out.println(table1.toString());
+		//System.out.println(table2.toString());
 	}
 	public boolean hasTable(Table t) {
 		return (table1==t || table2==t) ? true : false;
+	}
+	
+	public String toString() {
+		return table1.toString() + "     " +table2.toString();
 	}
 }

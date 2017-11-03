@@ -23,88 +23,110 @@ public class DBSchema {
 		Relationship a = new Relationship (t1, t2, a1, a2);
 		relationships.add(a);
 	}
+
 	
-	public ArrayList<Path> buildPaths(ArrayList<Path> paths, Table baseTable, int max_length) {
-		if (paths == null) {
-			paths=new ArrayList<Path>();
-			 ArrayList<Relationship> basepaths= baseTable.getRelationships();
-			 System.out.println(basepaths.size());
-			 for (int j=0; j<basepaths.size(); j++) {
-				 //Path a = new Path();
-				 System.out.println("are you running");
-				 paths.add(new Path().addRelationship(basepaths.get(j)));
-			 }
+	public void createPaths(Path partial, ArrayList<Path> toReturn, Table targetTable, int max_length) {
+		if (partial== null) {
+			partial = new Path();
 		}
-		if {
-			boolean isComplete=true;
-			for (Path p : paths) {
-				if (!(p.getRelationships().size() >=3)) {
-					Relationship lastRel = p.getLastRelationship();
-					Table[] lastRelationshipTables= lastRel.getTables();
-					Relationship secondToLastRel;
-					if (p.getRelationships().size() > 1) {
-						secondToLastRel = p.getSecondToLastRelationship();
-						Table[] secondToLastRelationshipTables=secondToLastRel.getTables();
-						Table nextRelTable=null;
-						
-						if (lastRelationshipTables[0] == secondToLastRelationshipTables[0]) {
-							nextRelTable=lastRelationshipTables[1];
-						}
-						else if (lastRelationshipTables[1] == secondToLastRelationshipTables[0]){
-							nextRelTable=lastRelationshipTables[0];
-						}
-						else if (lastRelationshipTables[0] == secondToLastRelationshipTables[1]){
-							nextRelTable=lastRelationshipTables[1];
-						}
-						else {
-							nextRelTable=lastRelationshipTables[0];
-						}
-						if (nextRelTable.getRelationships().size()>0) {
-							isComplete=false;
+		
+		System.out.println("this is partial: " + partial.toString());
+		
+		if (partial.getRelationships().size() == max_length) {
+			System.out.println("adding to return due to length");
+			toReturn.add(partial);
+			return;
+		}
+		
+		if (partial.getRelationships().size() != 0) {
+			if (partial.getLastRelationship().getTables()[0].getRelationships().size() < 2 && partial.getLastRelationship().getTables()[1].getRelationships().size() < 2) {
+				System.out.println("adding to return due to lack of paths");
+				toReturn.add(partial);
+				return;
+			}
+			System.out.println("Greater than zero but more possible paths");
+		}
+		
+		System.out.println("test");
+
+		Table nextRelTable = null;
+		System.out.println("num rels:" + partial.getRelationships().size());
+		if (partial.getRelationships().size() >= 2) {
+			Relationship secondToLast = partial.getSecondToLastRelationship();
+			Relationship last = partial.getLastRelationship();
+			
+
+				//Table nextRelTable = null;
+				if (last.getTables()[0] != secondToLast.getTables()[0] && last.getTables()[0] != secondToLast.getTables()[1]) {
+					nextRelTable = last.getTables()[0];
+					for (Relationship rel : nextRelTable.getRelationships()) {
+						if (rel != last) {
+							Path p2 = new Path(partial);
+							//if (targetTable.getRelationships())
+							p2.addRelationship(rel);
+							
+							//partial.addRelationship(rel);
+							createPaths(p2, toReturn, targetTable, max_length);
 							
 						}
-						System.out.println(nextRelTable.toString());
+
 					}
-					else {
-						Table[] relTables = p.getRelationship(0).getTables();
-						if (tables.contains(relTables[0]) && tables.contains(relTables[1]))
-							isComplete=true;
-						else
-							isComplete=false;
-						
+				}
+				else if (last.getTables()[1] != secondToLast.getTables()[0] && last.getTables()[1] != secondToLast.getTables()[1]) {
+					nextRelTable = last.getTables()[1];
+					for (Relationship rel : nextRelTable.getRelationships()) {
+						if (rel !=last) {
+							Path p2 = new Path(partial);
+							//if (targetTable.getRelationships())
+							p2.addRelationship(rel);
+							
+							//partial.addRelationship(rel);
+							createPaths(p2, toReturn, targetTable, max_length);
+						}
 					}
+				}
+		}
+		else if (partial.getRelationships().size() == 1){
+			nextRelTable = partial.getLastRelationship().getTables()[0];
+			for (Relationship rel : nextRelTable.getRelationships()) {
+				if (rel != partial.getLastRelationship()) {
+					Path p2 = new Path(partial);
+					//if (targetTable.getRelationships())
+					p2.addRelationship(rel);
 					
+					//partial.addRelationship(rel);
+					createPaths(p2, toReturn, targetTable, max_length);
 				}
 			}
-		}
-		//ArrayList<Table> current2 = new ArrayList<Table>();
-		
-		for (int i=0; i<paths.size(); i++) {
 			
-			Relationship lastRel = paths.get(i).getLastRelationship();
-			Table[] lastRelationshipTables= lastRel.getTables();
-			//System.out.println(lastRelationshipTables[0] + ", " +lastRelationshipTables[1]);
 			
-			if (lastRel.hasTable(lastRelationshipTables[0]) ^ lastRel.hasTable(lastRelationshipTables[1])){
-				System.out.println("hello");
-				Table t = lastRel.hasTable(lastRelationshipTables[0]) ? lastRelationshipTables[0] : lastRelationshipTables[1];
-				ArrayList<Relationship> tableRelationships = t.getRelationships();
-				for (int j=0; j<tableRelationships.size(); j++) {
-					paths.get(i).addRelationship(tableRelationships.get(j));
+			nextRelTable = partial.getLastRelationship().getTables()[1];
+			for (Relationship rel : nextRelTable.getRelationships()) {
+				if (partial.getLastRelationship() !=rel) {
+					Path p2 = new Path(partial);
+					//if (targetTable.getRelationships())
+					p2.addRelationship(rel);
+					
+					//partial.addRelationship(rel);
+					createPaths(p2, toReturn, targetTable, max_length);
 				}
-			}
-					//getRelationships();
-			return buildPaths(paths, baseTable, max_length);
-
+			}				
 		}
-		return paths;
-
+		else {
+			nextRelTable = targetTable;
+			for (int i = 0; i < nextRelTable.getRelationships().size(); i++) {
+				
+				Relationship rel=nextRelTable.getRelationships().get(i);
+			//for (Relationship rel : nextRelTable.getRelationships()) {
+				System.out.println(rel.toString());
+				Path p2 = new Path(partial);
+				//if (targetTable.getRelationships())
+				
+				p2.addRelationship(rel);
+				
+				//partial.addRelationship(rel);
+				createPaths(p2, toReturn, targetTable, max_length);
+			}	
+		}
 	}
-	
-	/*public void printPaths() {
-		for (int i = 0; i <paths.size()-1; i++) {
-			paths.get(i).getRelationships().toString();
-		}
-	}*/
-	
 }
