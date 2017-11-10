@@ -9,11 +9,13 @@ public class Main {
 	public static void main(String args[]) {
 		
 		Table route = new Table("route"); 
-		route.addAttribute("route_ID", true);
+		route.addAttribute("route_ID", true, false);
 		Table flight = new Table ("flight");
-		flight.addAttribute("flight_ID", true);
+		flight.addAttribute("flight_ID", true, false);
 		Table pilot = new Table("pilot");
-		pilot.addAttribute("pilot_ID", true);
+		pilot.addAttribute("pilot_ID", true, false);
+		Table cabin = new Table("cabin");
+		cabin.addAttribute("cabin_ID", true, false);
 		
 		
 		//route.addRelationship(flight,"flight_ID");
@@ -21,10 +23,11 @@ public class Main {
 		sc.addTable(flight);
 		sc.addTable(route);
 		sc.addTable(pilot);
+		sc.addTable(cabin);
 		
-		sc.createRelationship(route, flight, route.getAttribute("route_ID"), new Attribute("route_ID", false, flight));
-		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), new Attribute ("flight_ID", false, pilot));
-		//sc.buildPaths(null, route, 3);
+		sc.createRelationship(route, flight, route.getAttribute("route_ID"), new Attribute("route_ID", false, true, flight));
+		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), new Attribute ("flight_ID", false, true, pilot));
+		sc.createRelationship(pilot, cabin, pilot.getAttribute("pilot_ID"), new Attribute ("cabin_ID", false, true, cabin));
 		
 		
 		ArrayList<Relationship> routeRels = flight.getRelationships();
@@ -35,10 +38,15 @@ public class Main {
 		ArrayList<Path> paths = new ArrayList<Path>();
 		
 		sc.createPaths(null, paths, route, 3);
-		
+		AttributeGenerator ag = new AttributeGenerator();
+
 		System.out.println("number of paths: " + paths.size());
 		for (Path p : paths) {
+			ArrayList<String> queries = ag.generate(p);
 			System.out.println(p.toString());
+			for (int i = 0; i < queries.size(); i++) {
+				System.out.println("query: "+ queries.get(i));
+			}
 		}
 		
 		
@@ -48,7 +56,6 @@ public class Main {
 		//System.out.println(sc.buildPaths(null, route, 3));
 		//System.out.println(sc.createPaths(partial, toReturn, targetTable, max_length);
 		//Table featureTable = attributeGenerate (sc, p, "target-attribute");
-		//sc.printPaths();
 	}
 
 }

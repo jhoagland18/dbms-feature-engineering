@@ -62,6 +62,7 @@ public class DBSchema {
 					nextRelTable = last.getTables()[1];
 					createNewPaths(nextRelTable, partial, toReturn, targetTable, max_length);
 				}
+			}
 		}
 		else if (partial.getRelationships().size() == 1){ //if only one relationship in partial, build paths off of each table.
 			nextRelTable = partial.getLastRelationship().getTables()[0];
