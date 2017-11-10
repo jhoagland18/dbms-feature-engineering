@@ -6,10 +6,14 @@ public class Table {
 	private String name;
 	private boolean isPrimaryKeySet=false;
 	private ArrayList<Attribute> attributes;
+	private ArrayList<Relationship> relationships;
+	private ArrayList<Path> paths;
+	
 	
 	public Table(String name) {
 		this.name=name;
 		attributes = new ArrayList<Attribute>();
+		relationships = new ArrayList<Relationship>();
 	}
 	
 	public int addAttribute(String attributeName, boolean isKey) {
@@ -19,10 +23,16 @@ public class Table {
 			if(isKey) {
 				isPrimaryKeySet=true;
 			}
-			Attribute a = new Attribute(attributeName, isKey);
+			Attribute a = new Attribute(attributeName, isKey, this);
 			attributes.add(a);
 			return 1;
 		}
+	}
+	
+	public void addRelationship (Relationship rel) {
+		//Relationship rel = new Relationship(targetTable, attribute);
+		relationships.add(rel);
+		System.out.println("Adding relationship for table: " + name);
 	}
 	
 	public String getTableName() {
@@ -32,5 +42,22 @@ public class Table {
 	public boolean isPKSet() {
 		return isPrimaryKeySet;
 	}
+	
+	public ArrayList<Relationship> getRelationships () {
+		return relationships;
+	}
+	
+	public String toString() {
+		return name;
+	}
+	public Attribute getAttribute(String name) {
+		for (int i = 0; i<attributes.size(); i++) {
+			if (attributes.get(i).equals(name)) {
+				return attributes.get(i);
+			}
+		}
+		return null;
+	}
+
 
 }
