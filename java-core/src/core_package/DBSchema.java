@@ -54,37 +54,35 @@ public class DBSchema {
 		if (partial.getRelationships().size() >= 2) {
 			Relationship secondToLast = partial.getSecondToLastRelationship();
 			Relationship last = partial.getLastRelationship();
-			
 
-				//Table nextRelTable = null;
-				if (last.getTables()[0] != secondToLast.getTables()[0] && last.getTables()[0] != secondToLast.getTables()[1]) {
-					nextRelTable = last.getTables()[0];
-					for (Relationship rel : nextRelTable.getRelationships()) {
-						if (rel != last) {
-							Path p2 = new Path(partial);
-							//if (targetTable.getRelationships())
-							p2.addRelationship(rel);
-							
-							//partial.addRelationship(rel);
-							createPaths(p2, toReturn, targetTable, max_length);
-							
-						}
-
+			//Table nextRelTable = null;
+			if (last.getTables()[0] != secondToLast.getTables()[0] && last.getTables()[0] != secondToLast.getTables()[1]) {
+				nextRelTable = last.getTables()[0];
+				for (Relationship rel : nextRelTable.getRelationships()) {
+					if (rel != last) {
+						Path p2 = new Path(partial);
+						//if (targetTable.getRelationships())
+						p2.addRelationship(rel);
+						
+						//partial.addRelationship(rel);
+						createPaths(p2, toReturn, targetTable, max_length);
+						
 					}
 				}
-				else if (last.getTables()[1] != secondToLast.getTables()[0] && last.getTables()[1] != secondToLast.getTables()[1]) {
-					nextRelTable = last.getTables()[1];
-					for (Relationship rel : nextRelTable.getRelationships()) {
-						if (rel !=last) {
-							Path p2 = new Path(partial);
-							//if (targetTable.getRelationships())
-							p2.addRelationship(rel);
-							
-							//partial.addRelationship(rel);
-							createPaths(p2, toReturn, targetTable, max_length);
-						}
+			}
+			else if (last.getTables()[1] != secondToLast.getTables()[0] && last.getTables()[1] != secondToLast.getTables()[1]) {
+				nextRelTable = last.getTables()[1];
+				for (Relationship rel : nextRelTable.getRelationships()) {
+					if (rel !=last) {
+						Path p2 = new Path(partial);
+						//if (targetTable.getRelationships())
+						p2.addRelationship(rel);
+						
+						//partial.addRelationship(rel);
+						createPaths(p2, toReturn, targetTable, max_length);
 					}
 				}
+			}
 		}
 		else if (partial.getRelationships().size() == 1){
 			nextRelTable = partial.getLastRelationship().getTables()[0];
@@ -98,7 +96,6 @@ public class DBSchema {
 					createPaths(p2, toReturn, targetTable, max_length);
 				}
 			}
-			
 			
 			nextRelTable = partial.getLastRelationship().getTables()[1];
 			for (Relationship rel : nextRelTable.getRelationships()) {

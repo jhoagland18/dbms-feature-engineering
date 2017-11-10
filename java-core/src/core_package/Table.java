@@ -7,7 +7,6 @@ public class Table {
 	private boolean isPrimaryKeySet=false;
 	private ArrayList<Attribute> attributes;
 	private ArrayList<Relationship> relationships;
-	private ArrayList<Path> paths;
 	
 	
 	public Table(String name) {
@@ -16,14 +15,14 @@ public class Table {
 		relationships = new ArrayList<Relationship>();
 	}
 	
-	public int addAttribute(String attributeName, boolean isKey) {
-		if(isKey && isPrimaryKeySet) {
+	public int addAttribute(String attributeName, boolean isPKey, boolean isFKey) {
+		if(isPKey && isPrimaryKeySet) {
 			return -1;
 		} else {
-			if(isKey) {
+			if(isPKey) {
 				isPrimaryKeySet=true;
 			}
-			Attribute a = new Attribute(attributeName, isKey, this);
+			Attribute a = new Attribute(attributeName, isPKey, isFKey, this);
 			attributes.add(a);
 			return 1;
 		}
@@ -58,6 +57,16 @@ public class Table {
 		}
 		return null;
 	}
-
+	public ArrayList<Attribute> getAttributes() {
+		return attributes;
+	}
+	
+	public Attribute getPKey() {
+		for (int i =0; i < attributes.size(); i++ ) {
+			if (attributes.get(i).isPKey())
+				return attributes.get(i);
+		}
+		return null;
+	}
 
 }
