@@ -21,9 +21,11 @@ public class Path {
 	public Relationship getLastRelationship() {
 		return relationships.get(relationships.size()-1);
 	}
+
 	public Relationship getSecondToLastRelationship() {
 		return relationships.get(relationships.size()-2);
 	}
+
 	public Relationship getRelationship(int i) {
 		return relationships.get(i);
 	}
@@ -35,11 +37,12 @@ public class Path {
 	public int getLength() {
 		return relationships.size();
 	}
-	
+
 	public String toString() {
+
 		String s = "path: ";
 		for (Relationship rels : relationships) {
-			s = s + rels.toString();
+			s += "[ "+rels.toString()+" ] ";
 		}
 		return s;
 	}
