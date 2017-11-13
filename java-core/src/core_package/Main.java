@@ -9,7 +9,7 @@ import static java.lang.Thread.yield;
 public class Main {
 
 	static ArrayList<Path> paths;
-	static boolean verbose=true; //enable for verbose output logging
+	static final boolean verbose=true; //enable for verbose output logging
 
 	public static void main(String args[]) {
 		
