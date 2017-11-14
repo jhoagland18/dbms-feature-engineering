@@ -1,129 +1,104 @@
 package core_package;
 
+import com.sun.corba.se.impl.orbutil.closure.Future;
+
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Queue;
+import java.util.concurrent.*;
+
+import static java.lang.Thread.sleep;
 
 public class PathfinderController {
 
     final int numThreads;
-    final sun.misc.Queue<Path> partialQueue = new sun.misc.Queue();
     final int maxLength;
-    private Pathfinder[] threads;
-    private boolean[] threadsWaiting;
+
+    private ExecutorService executor;
+    private int activeThreads=0;
+
+    private int totalThreads=0;
+
+    private ArrayList<java.util.concurrent.Future> futures = new ArrayList<java.util.concurrent.Future>();
 
     public PathfinderController(int numThreads, int maxLength) {
         this.numThreads = numThreads;
         this.maxLength = maxLength;
-        threads = new Pathfinder[numThreads];
-        threadsWaiting = new boolean[numThreads];
+        executor = Executors.newFixedThreadPool(numThreads);
     }
 
-    public void createPaths(Table targetTable) {
+    public void createPaths(Table targetTable, ArrayList<Path> toReturn) {
+        int threadCounter=0;
         for (Relationship rel : targetTable.getRelationships()) {
             Path p2 = new Path();
             p2.addRelationship(rel);
-            partialQueue.enqueue(p2);
-            Main.printVerbose("Spawning new pathfinding thread");
-        }
-    }
-
-    public void startThreads(ArrayList<Path> toReturn) {
-
-        int numStartedThreads = 0;
-        while (numStartedThreads < numThreads) {
             try {
-                Pathfinder pf = new Pathfinder(this, toReturn, "thread"+numStartedThreads, numStartedThreads);
-                threads[numStartedThreads] = pf;
-                threadsWaiting[numStartedThreads] = false;
-                numStartedThreads++;
-                Main.printVerbose("Creating thread "+numStartedThreads +" of "+numThreads);
+                Pathfinder pf = new Pathfinder(this, toReturn, "Thread "+countThreads(), p2);
+                futures.add(executor.submit(pf));
+                threadCounter++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            Main.printVerbose("Spawning new pathfinding thread");
         }
 
-        for(int i=0; i<threads.length; i++) {
-            if(threads[i]!=null) {
+        synchronized (futures) {
+
+            for (int i = 0; i < futures.size(); i++) {
                 try {
-                    threads[i].join();
+                    futures.get(i).get();
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
             }
         }
+
+        executor.shutdown();
+
+        try {
+            executor.awaitTermination(1,TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public synchronized Path dequeue() throws InterruptedException {
-        return partialQueue.dequeue();
-    }
-
-    public synchronized boolean enqueue(Path path) {
-        partialQueue.enqueue(path);
-        return true;
+    public synchronized void enqueue(Pathfinder pf) {
+        futures.add(executor.submit(pf));
     }
 
     public synchronized int getMaxLength() {
         return maxLength;
     }
 
-    public synchronized boolean isQueueEmpty() {
-        return partialQueue.isEmpty();
-    }
+/*
+    public synchronized void ifAllThreadsCompleteShutdown() {
 
-    public boolean allThreadsWaiting(Pathfinder pf) {
-
-        if (numThreads == 1) {
-            return true;
+        for(int i=0; i<futures.size(); i++) {
+            if(futures.get(i).isDone()) {
+                futures.remove(i);
+                i--;
+            }
         }
 
-        int count=0;
+        Main.printVerbose("futures size "+futures.size() + " "+futures.toString());
 
-        Main.printVerbose("Current thread is "+pf.getName());
+        if(futures.size()==1) {
+            Main.printVerbose("shutting down pathfinding");
+            executor.shutdown();
 
-        for (int i = 0; i < threadsWaiting.length; i++) {
-            if(threadsWaiting[i]==true)
-                count++;
-
-        }
-
-        if(count>=numThreads-2)
-            return true;
-        else
-            return false;
-    }
-
-    public void endPathFinding() {
-        for (int i = 0; i < threads.length; i++) {
-            if (threads[i] != null) {
-                threads[i].stopThread();
+            try {
+                executor.awaitTermination(1,TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
+    */
 
-    public synchronized int getNumberOfThreadsWaiting() {
-        int num = 0;
-        for (int i = 0; i < threadsWaiting.length; i++) {
-            if(threadsWaiting[i]==true)
-                num++;
-        }
-        return num;
-    }
-
-    public synchronized int getNumberOfThreadsActive() {
-        int num = 0;
-        for (int i = 0; i < threads.length; i++) {
-            if(threads[i]!=null) {
-                num++;
-            }
-        }
-        return num;
-    }
-
-    public void setWaiting(Pathfinder pf) {
-        threadsWaiting[pf.getIndex()]=true;
-    }
-
-    public void setActive(Pathfinder pf) {
-        threadsWaiting[pf.getIndex()]=false;
+    public synchronized int countThreads() {
+        return totalThreads++;
     }
 }
