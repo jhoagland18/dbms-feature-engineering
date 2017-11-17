@@ -22,7 +22,7 @@ public class DBSchema {
 	}
 
 	public void createPaths(ArrayList<Path> toReturn, Table targetTable, int max_length) {
-		PathfinderController controller = new PathfinderController(4, max_length);
+		PathfinderController controller = new PathfinderController(Environment.MAX_THREADS, max_length);
 		controller.createPaths(targetTable, toReturn);
 	}
 }

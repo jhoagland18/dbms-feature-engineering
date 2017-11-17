@@ -9,11 +9,15 @@ import static java.lang.Thread.yield;
 public class Main {
 
 	static ArrayList<Path> paths;
-	static final boolean verbose=true; //enable for verbose output logging
+	static final int printMode=Environment.PRINT_MODE_VERBOSE; //enable for verbose output logging
 
 	public static
 	void main(String args[]) {
-		
+
+		DBSchema sc = new DBSchema();
+
+		paths = new ArrayList<Path>();
+
 		Table route = new Table("route"); 
 		route.addAttribute("route_ID", true, false);
 		Table flight = new Table ("flight");
@@ -24,10 +28,7 @@ public class Main {
 		cabin.addAttribute("cabin_ID", true, false);
 		Table destination = new Table("destination");
 		destination.addAttribute("destination_ID",true,false);
-		
-		
-		//route.addRelationship(flight,"flight_ID");
-		DBSchema sc = new DBSchema();
+
 		sc.addTable(flight);
 		sc.addTable(route);
 		sc.addTable(pilot);
@@ -38,19 +39,23 @@ public class Main {
 		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), new Attribute ("flight_ID", false, true, pilot));
 		sc.createRelationship(pilot, cabin, pilot.getAttribute("pilot_ID"), new Attribute ("pilot_ID", false, true, cabin));
 		sc.createRelationship(route, destination, route.getAttribute("route_ID"), new Attribute("route_ID",false, true, destination));
-		
-		paths = new ArrayList<Path>();
-		sc.createPaths(paths, route, 3);
+
+		sc.createPaths(paths, route, Environment.MAX_PATH_DEPTH);
+
 		AttributeGenerator ag = new AttributeGenerator();
 
 		System.out.println("number of paths found: " + paths.size());
 
 		for (Path p : paths) {
-			ArrayList<String> queries = ag.generate(p);
 			System.out.println("Final path: "+p.toString());
+		}
+		System.out.println("\n");
+		for (Path p : paths) {
+			ArrayList<String> queries = ag.generate(p);
 			for (int i = 0; i < queries.size(); i++) {
 				System.out.println("query: "+ queries.get(i));
 			}
+			System.out.println("\n");
 		}
 		
 		
@@ -63,7 +68,7 @@ public class Main {
 	}
 
 	public static void printVerbose(String toPrint) {
-		if(Main.verbose)
+		if(printMode==Environment.PRINT_MODE_VERBOSE)
 			System.out.println(toPrint);
 	}
 

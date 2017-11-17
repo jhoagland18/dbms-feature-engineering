@@ -12,7 +12,6 @@ public class Pathfinder implements Runnable {
 
     private Thread pf;
     private Path partial;
-    private boolean run=true;
 
     public Pathfinder(PathfinderController controller, ArrayList<Path> toReturn, String name, Path partial) throws InterruptedException {
         synchronized (toReturn) {
@@ -36,7 +35,6 @@ public class Pathfinder implements Runnable {
     }
 
     public void buildPartials() throws InterruptedException { //adds paths to list parameter up to max_length
-        //Main.printVerbose(pf.getName()+" is starting new buildpartials");
         Main.printVerbose(pf.getName() + " partial: " + partial.toString()+" length "+partial.getLength()); //check path at run
 
         if (partial.getLength() == max_length) { //if path is at max_length, add to toReturn and end recursive loop
@@ -45,26 +43,17 @@ public class Pathfinder implements Runnable {
             }
             return;
         }
-        /*
-        if (partial.getLastRelationship().getTables()[0].getRelationships().size() < 2
-                && partial.getLastRelationship().getTables()[1].getRelationships().size() < 2) {
-            //if the two tables in the last added relationship only link to each other, return
-            synchronized (toReturn) {
-                toReturn.add(partial);
-            }
-            return;
-        }
-        */
+
 
         Table nextRelTable = null;
 
-       if (partial.getRelationships().size() > 1) { //if more 1 relationship in path
+        if (partial.getRelationships().size() > 1) { //if more than 1 relationship in path
             Relationship secondToLast = partial.getSecondToLastRelationship();
             Relationship last = partial.getLastRelationship();
 
-/*
-The block of code below identifies which table to build off of for the next relationship in partial.
- */
+            /*
+            The block of code below identifies which table to build off of for the next relationship in partial.
+            */
 
             if (last.getTables()[0] != secondToLast.getTables()[0] && last.getTables()[0] != secondToLast.getTables()[1]) { //check if table 1 was used in the previous relationship link
                 nextRelTable = last.getTables()[0];
@@ -72,13 +61,13 @@ The block of code below identifies which table to build off of for the next rela
                 nextRelTable = last.getTables()[1];
             }
 
-            if(nextRelTable.getRelationships().size()>1)
+            if (nextRelTable.getRelationships().size() > 1) {
                 createNewPaths(nextRelTable);
-            else {
+            } else {
                 synchronized (toReturn) {
                     toReturn.add(partial);
-                    return;
                 }
+                return;
             }
 
         } else if (partial.getLength() == 1) { //if only one relationship in partial, build paths off of each table.
@@ -88,24 +77,24 @@ The block of code below identifies which table to build off of for the next rela
             nextRelTable = partial.getLastRelationship().getTables()[1];
             createNewPaths(nextRelTable);
         }
-
     }
 
     public void createNewPaths(Table nextRelTable) {
         //iterates through relationships of next table in relationship and recursively calls createPaths to generate all partials
 
-        for (Relationship rel : nextRelTable.getRelationships()) {
-            if (rel != partial.getLastRelationship()) { //add all relationships that are not the previous one used in partial
-                Path p2 = new Path(this.partial);
-                p2.addRelationship(rel);
-                Main.printVerbose("Submitting "+p2.toString());
-                try {
-                    controller.enqueue(new Pathfinder(this.controller, this.toReturn, "Thread "+controller.countThreads(), p2));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+       for (Relationship rel : nextRelTable.getRelationships()) {
+           if (rel != partial.getLastRelationship()) { //add all relationships that are not the previous one used in partial
+               Path p2 = new Path(this.partial);
+               p2.addRelationship(rel);
+               Main.printVerbose(pf.getName()+" submitting "+p2.toString());
+               try {
+                   controller.enqueue(new Pathfinder(this.controller, this.toReturn, "Thread "+controller.countThreads(), p2));
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           }
+       }
+
     }
 
     public String getName() {

@@ -10,7 +10,7 @@ public class Path {
 		relationships = new ArrayList<Relationship>();
 	}
 	public Path(Path p) {
-		relationships = p.getRelationships();
+		relationships = new ArrayList<Relationship>(p.getRelationships());
 	}
 	
 	public Path addRelationship(Relationship rel) {
