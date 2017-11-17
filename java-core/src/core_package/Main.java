@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import static java.lang.Thread.yield;
 
-//Created by Gayatri Krishnan and Jackson Hoagland on 9/29/2017
+//Created by Michele Samorani, Gayatri Krishnan, and Jackson Hoagland during academic research with Santa Clara University on 9/29/2017
 
 public class Main {
 
