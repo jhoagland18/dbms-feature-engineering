@@ -7,14 +7,14 @@ public class Attribute extends ArrayList {
 	private String name;
 	private Table parentTable;
 	private boolean isPKey;
-	boolean isFKey;
+	//private boolean isFKey;
 	
 
-	public Attribute(String attributeName, boolean isPKey, boolean isFKey, Table t) {
+	public Attribute(String attributeName, boolean isPKey, Table t) {
 		this.name=attributeName;
 		parentTable=t;
 		this.isPKey=isPKey;
-		this.isFKey=isFKey;
+		//this.isFKey=isFKey;
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -26,8 +26,8 @@ public class Attribute extends ArrayList {
 		return isPKey;
 	}
 	
-	public boolean isFKey() {
+	/*public boolean isFKey() {
 		return isFKey;
-	}
+	}*/
 
 }

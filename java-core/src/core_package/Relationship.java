@@ -1,14 +1,16 @@
 package core_package;
 
 public class Relationship {
-	
+	//determine
 	private Table table1;
 	private Table table2;
 	private Attribute attribute1;
 	private Attribute attribute2;
+	public static int ONE_TO_N =1;
+	public static int ONE_TO_ONE =0;
 	//store Relationship Types
 	
-	public Relationship (Table a, Table b, Attribute att1, Attribute att2) {
+	public Relationship (Table a, Table b, Attribute att1, Attribute att2, int cardinality) {
 		table1=a;
 		table2=b;
 
