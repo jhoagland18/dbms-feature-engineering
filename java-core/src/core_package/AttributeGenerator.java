@@ -11,8 +11,8 @@ public class AttributeGenerator {
 	public ArrayList<String> generate(Path p) {
 		
 		for (int i = 0; i < p.getRelationships().size(); i++) {
-			Table a = p.getRelationship(i).getTables()[0];
-			Table b = p.getRelationship(i).getTables()[1];
+			Table a = p.getRelationship(i).getTables()[1];
+			Table b = p.getRelationship(i).getTables()[0];
 			
 			if (p.getLength() == 1) {
 				

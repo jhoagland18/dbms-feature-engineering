@@ -29,12 +29,11 @@ public class Main {
 		
 		
 		//route.addRelationship(flight,"flight_ID");
-		DBSchema sc = new DBSchema();
 		sc.addTable(flight);
 		sc.addTable(route);
 		sc.addTable(pilot);
 		sc.addTable(cabin);
-		sc.addTable(destination);
+		//sc.addTable(destination);
 		
 		sc.createRelationship(route, flight, route.getAttribute("route_ID"), flight.addForeignKey("route_ID", route));
 		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), pilot.addForeignKey("flight_ID", flight));
@@ -48,7 +47,7 @@ public class Main {
 		
 		ArrayList<Path> paths = new ArrayList<Path>();
 		
-		sc.createPaths(null, paths, route, 3);
+		sc.createPaths(paths, route, 3);
 		AttributeGenerator ag = new AttributeGenerator();
 
 		System.out.println("number of paths found: " + paths.size());
