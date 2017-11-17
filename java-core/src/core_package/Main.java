@@ -2,12 +2,22 @@ package core_package;
 
 import java.util.ArrayList;
 
-//Created by Gayatri Krishnan and Jackson Hoagland on 9/29/2017
+import static java.lang.Thread.yield;
+
+//Created by Michele Samorani, Gayatri Krishnan, and Jackson Hoagland during academic research with Santa Clara University on 9/29/2017
 
 public class Main {
-	
-	public static void main(String args[]) {
-		
+
+	static ArrayList<Path> paths;
+	static final int printMode=Environment.PRINT_MODE_VERBOSE; //enable for verbose output logging
+
+	public static
+	void main(String args[]) {
+
+		DBSchema sc = new DBSchema();
+
+		paths = new ArrayList<Path>();
+
 		Table route = new Table("route"); 
 		route.addAttribute("route_ID", true);
 		Table flight = new Table ("flight");
@@ -24,6 +34,7 @@ public class Main {
 		sc.addTable(route);
 		sc.addTable(pilot);
 		sc.addTable(cabin);
+		sc.addTable(destination);
 		
 		sc.createRelationship(route, flight, route.getAttribute("route_ID"), flight.addForeignKey("route_ID", route));
 		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), pilot.addForeignKey("flight_ID", flight));
@@ -40,13 +51,18 @@ public class Main {
 		sc.createPaths(null, paths, route, 3);
 		AttributeGenerator ag = new AttributeGenerator();
 
-		System.out.println("number of paths: " + paths.size());
+		System.out.println("number of paths found: " + paths.size());
+
+		for (Path p : paths) {
+			System.out.println("Final path: "+p.toString());
+		}
+		System.out.println("\n");
 		for (Path p : paths) {
 			ArrayList<String> queries = ag.generate(p);
-			System.out.println(p.toString());
 			for (int i = 0; i < queries.size(); i++) {
 				System.out.println("query: "+ queries.get(i));
 			}
+			System.out.println("\n");
 		}
 		
 		
@@ -56,6 +72,11 @@ public class Main {
 		//System.out.println(sc.buildPaths(null, route, 3));
 		//System.out.println(sc.createPaths(partial, toReturn, targetTable, max_length);
 		//Table featureTable = attributeGenerate (sc, p, "target-attribute");
+	}
+
+	public static void printVerbose(String toPrint) {
+		if(printMode==Environment.PRINT_MODE_VERBOSE)
+			System.out.println(toPrint);
 	}
 
 }

@@ -43,7 +43,7 @@ public class Table {
 	public void addRelationship (Relationship rel) {
 		//Relationship rel = new Relationship(targetTable, attribute);
 		relationships.add(rel);
-		System.out.println("Adding relationship for table: " + name);
+		Main.printVerbose("Adding relationship for table: " + name);
 	}
 	
 	public String getTableName() {
