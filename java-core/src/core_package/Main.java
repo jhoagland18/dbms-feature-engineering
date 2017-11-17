@@ -9,13 +9,13 @@ public class Main {
 	public static void main(String args[]) {
 		
 		Table route = new Table("route"); 
-		route.addAttribute("route_ID", true, false);
+		route.addAttribute("route_ID", true);
 		Table flight = new Table ("flight");
-		flight.addAttribute("flight_ID", true, false);
+		flight.addAttribute("flight_ID", true);
 		Table pilot = new Table("pilot");
-		pilot.addAttribute("pilot_ID", true, false);
+		pilot.addAttribute("pilot_ID", true);
 		Table cabin = new Table("cabin");
-		cabin.addAttribute("cabin_ID", true, false);
+		cabin.addAttribute("cabin_ID", true);
 		
 		
 		//route.addRelationship(flight,"flight_ID");
@@ -25,9 +25,9 @@ public class Main {
 		sc.addTable(pilot);
 		sc.addTable(cabin);
 		
-		sc.createRelationship(route, flight, route.getAttribute("route_ID"), new Attribute("route_ID", false, true, flight));
-		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), new Attribute ("flight_ID", false, true, pilot));
-		sc.createRelationship(pilot, cabin, pilot.getAttribute("pilot_ID"), new Attribute ("cabin_ID", false, true, cabin));
+		sc.createRelationship(route, flight, route.getAttribute("route_ID"), flight.addForeignKey("route_ID", route));
+		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), pilot.addForeignKey("flight_ID", flight));
+		sc.createRelationship(pilot, cabin, pilot.getAttribute("pilot_ID"), cabin.addForeignKey("pilot_ID", pilot));
 		
 		
 		ArrayList<Relationship> routeRels = flight.getRelationships();
