@@ -11,7 +11,8 @@ public class Main {
 	static ArrayList<Path> paths;
 	static final boolean verbose=true; //enable for verbose output logging
 
-	public static void main(String args[]) {
+	public static
+	void main(String args[]) {
 		
 		Table route = new Table("route"); 
 		route.addAttribute("route_ID", true, false);
