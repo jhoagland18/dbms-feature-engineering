@@ -63,7 +63,7 @@ public class Pathfinder implements Runnable {
 
             if (nextRelTable.getRelationships().size() > 1) {
                 createNewPaths(nextRelTable);
-            } else {
+            } else { //if previous relationship cannot be built off of.
                 synchronized (toReturn) {
                     toReturn.add(partial);
                 }

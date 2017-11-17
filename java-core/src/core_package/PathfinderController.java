@@ -17,7 +17,6 @@ public class PathfinderController {
 
     public PathfinderController(int numThreads, int maxLength) {
         this.numThreads = numThreads;
-        Main.printVerbose("creating controller with maxlength of "+maxLength);
         this.maxLength = maxLength;
         executor = Executors.newFixedThreadPool(numThreads);
     }
@@ -32,7 +31,6 @@ public class PathfinderController {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            Main.printVerbose("Spawning new pathfinding thread");
         }
 
         synchronized (futures) {
