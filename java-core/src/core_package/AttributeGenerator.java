@@ -1,5 +1,9 @@
 package core_package;
 
+import core_package.Pathfinding.Path;
+import core_package.Schema.Relationship;
+import core_package.Schema.Table;
+
 import java.util.ArrayList;
 
 public class AttributeGenerator {
@@ -38,10 +42,10 @@ public class AttributeGenerator {
 				}*/
 				
 			}
-			System.out.println(a.toString() + " "+ a.getFKeys().size());
+			System.out.println(a.toString() + " "+ a.getForeignKeys().size());
 			
-			for (int j = 0; j<a.getFKeys().size(); j++) {
-				fKey = a.getFKeys().get(j).getAttributeName();
+			for (int j = 0; j<a.getForeignKeys().size(); j++) {
+				fKey = a.getForeignKeys().get(j).getAttributeName();
 
 				String s="SELECT *" + 
 						" FROM " + a.getTableName() + 

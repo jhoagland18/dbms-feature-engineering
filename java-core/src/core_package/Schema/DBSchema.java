@@ -1,4 +1,9 @@
-package core_package;
+package core_package.Schema;
+
+import core_package.Schema.Attribute.Attribute;
+import core_package.Environment;
+import core_package.Pathfinding.Path;
+import core_package.Pathfinding.PathfinderController;
 
 import java.util.ArrayList;
 
@@ -16,8 +21,8 @@ public class DBSchema {
 		tables.add(p);
 	}
 
-	public void createRelationship(Table t1, Table t2, Attribute a1, Attribute a2) {
-		Relationship a = new Relationship(t1, t2, a1, a2, Relationship.ONE_TO_ONE);
+	public void createRelationship(Attribute a1, Attribute a2, int cardinality) {
+		Relationship a = new Relationship(a1, a2, cardinality);
 		relationships.add(a);
 	}
 

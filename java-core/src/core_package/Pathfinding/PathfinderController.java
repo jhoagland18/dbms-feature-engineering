@@ -1,4 +1,7 @@
-package core_package;
+package core_package.Pathfinding;
+
+import core_package.Schema.Relationship;
+import core_package.Schema.Table;
 
 import java.util.ArrayList;
 import java.util.concurrent.*;
@@ -15,6 +18,8 @@ public class PathfinderController {
 
     private ArrayList<java.util.concurrent.Future> futures = new ArrayList<java.util.concurrent.Future>();
 
+    private Table targetTable;
+
     public PathfinderController(int numThreads, int maxLength) {
         this.numThreads = numThreads;
         this.maxLength = maxLength;
@@ -22,6 +27,7 @@ public class PathfinderController {
     }
 
     public void createPaths(Table targetTable, ArrayList<Path> toReturn) {
+        this.targetTable = targetTable;
         for (Relationship rel : targetTable.getRelationships()) {
             Path p2 = new Path();
             p2.addRelationship(rel);
@@ -66,5 +72,9 @@ public class PathfinderController {
 
     public synchronized int countThreads() {
         return totalThreads++;
+    }
+
+    public synchronized Table getTargetTable() {
+        return targetTable;
     }
 }
