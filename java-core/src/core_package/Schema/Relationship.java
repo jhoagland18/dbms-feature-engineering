@@ -1,22 +1,28 @@
-package core_package;
+package core_package.Schema;
+
+import core_package.Main;
+import core_package.Schema.Attribute.Attribute;
 
 public class Relationship {
-	//determine
+
 	private Table table1;
 	private Table table2;
 	private Attribute attribute1;
 	private Attribute attribute2;
-	public static int ONE_TO_N =1;
-	public static int ONE_TO_ONE =0;
-	//store Relationship Types
-	
-	public Relationship (Table a, Table b, Attribute att1, Attribute att2, int cardinality) {
-		table1=a;
-		table2=b;
 
-		attribute1=att1;	
+	//store relationship types
+	public final static int ONE_TO_MANY=1;
+	public final static int ONE_TO_ONE=0;
+	
+	public Relationship (Attribute att1, Attribute att2, int cardinality) {
+		attribute1=att1;
 		attribute2=att2;
-		
+
+		Main.printVerbose("att is " + att1.toString());
+		Main.printVerbose("table is "+att1.getParentTable());
+		table1=att1.getParentTable();
+		table2=att2.getParentTable();
+
 		addRelationshipsToTables();
 	}
 	
@@ -26,12 +32,12 @@ public class Relationship {
 		tables[1] = table2;
 		return tables;
 	}
+
 	public void addRelationshipsToTables() {
 		table1.addRelationship(this);
 		table2.addRelationship(this);
-		//System.out.println(table1.toString());
-		//System.out.println(table2.toString());
 	}
+
 	public boolean hasTable(Table t) {
 		return (table1==t || table2==t) ? true : false;
 	}

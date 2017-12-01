@@ -1,8 +1,12 @@
 package core_package;
 
-import java.util.ArrayList;
+import core_package.Pathfinding.Path;
+import core_package.Schema.DBSchema;
+import core_package.Schema.Relationship;
+import core_package.Schema.Table;
 
-import static java.lang.Thread.yield;
+import javax.naming.NameAlreadyBoundException;
+import java.util.ArrayList;
 
 //Created by Michele Samorani, Gayatri Krishnan, and Jackson Hoagland during academic research with Santa Clara University on 9/29/2017
 
@@ -12,32 +16,33 @@ public class Main {
 	static final int printMode=Environment.PRINT_MODE_VERBOSE; //enable for verbose output logging
 
 	public static
-	void main(String args[]) {
+	void main(String args[]) throws NameAlreadyBoundException {
 
 		DBSchema sc = new DBSchema();
 
 		paths = new ArrayList<Path>();
 
-		Table route = new Table("route"); 
-		route.addAttribute("route_ID", true);
+		Table route = new Table("route");
+		route.addNumericalAttribute("route_ID", true);
 		Table flight = new Table ("flight");
-		flight.addAttribute("flight_ID", true);
+		flight.addNumericalAttribute("flight_ID", true);
 		Table pilot = new Table("pilot");
-		pilot.addAttribute("pilot_ID", true);
+		pilot.addNumericalAttribute("pilot_ID", true);
 		Table cabin = new Table("cabin");
-		cabin.addAttribute("cabin_ID", true);
-		
-		
-		//route.addRelationship(flight,"flight_ID");
+		cabin.addNumericalAttribute("cabin_ID", true);
+		Table destination = new Table("destination");
+		destination.addNumericalAttribute("destination_ID", true);
+
 		sc.addTable(flight);
 		sc.addTable(route);
 		sc.addTable(pilot);
 		sc.addTable(cabin);
-		//sc.addTable(destination);
+		sc.addTable(destination);
 		
-		sc.createRelationship(route, flight, route.getAttribute("route_ID"), flight.addForeignKey("route_ID", route));
-		sc.createRelationship(flight, pilot, flight.getAttribute("flight_ID"), pilot.addForeignKey("flight_ID", flight));
-		sc.createRelationship(pilot, cabin, pilot.getAttribute("pilot_ID"), cabin.addForeignKey("pilot_ID", pilot));
+		sc.createRelationship(route.getPrimaryKey(), flight.addNumericalForeignKey("route_ID", route), Relationship.ONE_TO_ONE);
+		sc.createRelationship(flight.getPrimaryKey(), pilot.addNumericalForeignKey("flight_ID", flight), Relationship.ONE_TO_ONE);
+		sc.createRelationship(pilot.getPrimaryKey(), cabin.addNumericalForeignKey("pilot_ID", pilot), Relationship.ONE_TO_ONE);
+		sc.createRelationship(route.getPrimaryKey(), destination.addNumericalForeignKey("route_ID", route), Relationship.ONE_TO_ONE);
 		
 		
 		ArrayList<Relationship> routeRels = flight.getRelationships();

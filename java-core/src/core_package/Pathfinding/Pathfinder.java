@@ -1,8 +1,10 @@
-package core_package;
+package core_package.Pathfinding;
+
+import core_package.*;
+import core_package.Schema.Relationship;
+import core_package.Schema.Table;
 
 import java.util.ArrayList;
-import java.util.concurrent.Future;
-import java.util.concurrent.RunnableFuture;
 
 public class Pathfinder implements Runnable {
 
@@ -71,11 +73,16 @@ public class Pathfinder implements Runnable {
             }
 
         } else if (partial.getLength() == 1) { //if only one relationship in partial, build paths off of each table.
-            nextRelTable = partial.getLastRelationship().getTables()[0];
-            createNewPaths(nextRelTable);
 
-            nextRelTable = partial.getLastRelationship().getTables()[1];
-            createNewPaths(nextRelTable);
+            for(Table t : partial.getLastRelationship().getTables()) {
+                if(t!=controller.getTargetTable())
+                    if(t.getRelationships().size()>1)
+                        createNewPaths(t);
+                    else
+                        synchronized (toReturn) {
+                            toReturn.add(partial);
+                        }
+            }
         }
     }
 

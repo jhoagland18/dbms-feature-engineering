@@ -1,4 +1,6 @@
-package core_package;
+package core_package.Pathfinding;
+
+import core_package.Schema.Relationship;
 
 import java.util.ArrayList;
 
