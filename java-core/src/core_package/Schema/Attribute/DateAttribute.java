@@ -1,5 +1,6 @@
 package core_package.Schema.Attribute;
 
+import core_package.Schema.Relationship;
 import core_package.Schema.Table;
 
 public class DateAttribute extends Attribute {
@@ -11,4 +12,10 @@ public class DateAttribute extends Attribute {
     public DateAttribute(String attributeName, Table t) {
         super(attributeName, false, t);
     }
+
+	@Override
+	public StringBuilder fillTemplate(String[] accessPoints, Relationship rel) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

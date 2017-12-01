@@ -1,5 +1,6 @@
 package core_package.Schema.Attribute;
 
+import core_package.Schema.Relationship;
 import core_package.Schema.Table;
 
 import java.util.ArrayList;
@@ -35,5 +36,11 @@ public class CategoricalAttribute extends Attribute {
     public boolean removeType(String s) {
         return types.remove(s);
     }
+
+	@Override
+	public String fillTemplate(String[] accessPoints, Relationship rel) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
