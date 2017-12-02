@@ -41,20 +41,18 @@ public class Main {
 		sc.addTable(clients);
 		sc.addTable(products);
 		
-		sc.createRelationship(route.getPrimaryKey(), flight.addNumericalForeignKey("route_ID", route), Relationship.ONE_TO_ONE);
-		sc.createRelationship(flight.getPrimaryKey(), pilot.addNumericalForeignKey("flight_ID", flight), Relationship.ONE_TO_ONE);
-		sc.createRelationship(pilot.getPrimaryKey(), cabin.addNumericalForeignKey("pilot_ID", pilot), Relationship.ONE_TO_ONE);
-		sc.createRelationship(route.getPrimaryKey(), destination.addNumericalForeignKey("route_ID", route), Relationship.ONE_TO_ONE);
+		sc.createRelationship(products.getPrimaryKey(), purchases.addNumericalForeignKey("purchase_id", products), Relationship.ONE_TO_MANY);
+		sc.createRelationship(clients.getPrimaryKey(), purchases.addNumericalForeignKey("flight_ID", clients), Relationship.ONE_TO_MANY);
 		
 		
-		ArrayList<Relationship> routeRels = flight.getRelationships();
-		for (Relationship r : routeRels ) {
-			System.out.println("Route relationships: "+r.getTables()[0]+", "+r.getTables()[1]);
+		ArrayList<Relationship> purchasesRel = purchases.getRelationships();
+		for (Relationship r : purchasesRel ) {
+			System.out.println("Purchase relationships: "+r.getTables()[0]+", "+r.getTables()[1]);
 		}
 		
 		ArrayList<Path> paths = new ArrayList<Path>();
 		
-		sc.createPaths(paths, route, 3);
+		sc.createPaths(paths, purchases, 3);
 		AttributeGenerator ag = new AttributeGenerator();
 
 		System.out.println("number of paths found: " + paths.size());
