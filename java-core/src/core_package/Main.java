@@ -42,8 +42,10 @@ public class Main {
 		sc.addTable(products);
 		
 		sc.createRelationship(products.getPrimaryKey(), purchases.addNumericalForeignKey("purchase_id", products), Relationship.ONE_TO_MANY);
-		sc.createRelationship(clients.getPrimaryKey(), purchases.addNumericalForeignKey("flight_ID", clients), Relationship.ONE_TO_MANY);
-		
+		sc.createRelationship(clients.getPrimaryKey(), purchases.addNumericalForeignKey("client_id", clients), Relationship.ONE_TO_MANY);
+/*		sc.createRelationship(purchases.getPrimaryKey(), products.addNumericalForeignKey("purchase_id", purchases), Relationship.ONE_TO_MANY);
+		sc.createRelationship(purchases.getPrimaryKey(), clients.addNumericalForeignKey("client_id", purchases), Relationship.ONE_TO_MANY);
+*/		
 		
 		ArrayList<Relationship> purchasesRel = purchases.getRelationships();
 		for (Relationship r : purchasesRel ) {
@@ -52,7 +54,7 @@ public class Main {
 		
 		ArrayList<Path> paths = new ArrayList<Path>();
 		
-		sc.createPaths(paths, purchases, 3);
+		sc.createPaths(paths, purchases, 5);
 		AttributeGenerator ag = new AttributeGenerator();
 
 		System.out.println("number of paths found: " + paths.size());
