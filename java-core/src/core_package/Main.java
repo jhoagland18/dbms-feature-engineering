@@ -22,8 +22,13 @@ public class Main {
 
 		paths = new ArrayList<Path>();
 
-		Table route = new Table("route");
-		route.addNumericalAttribute("route_ID", true);
+		Table purchases = new Table("Purchases");
+		purchases.addNumericalAttribute("purchase_id", true);
+		purchases.addNumericalAttribute("online", false);
+		purchases.addNumericalAttribute("return", false);
+		purchases.addDateAttribute("date", false);
+		
+		
 		Table flight = new Table ("flight");
 		flight.addNumericalAttribute("flight_ID", true);
 		Table pilot = new Table("pilot");
@@ -60,7 +65,7 @@ public class Main {
 		for (Path p : paths) {
 			System.out.println("Final path: "+p.toString());
 		}
-		System.out.println("\n");
+/*		System.out.println("\n");
 		for (Path p : paths) {
 			ArrayList<String> queries = ag.generate(p);
 			for (int i = 0; i < queries.size(); i++) {
@@ -69,7 +74,7 @@ public class Main {
 			System.out.println("\n");
 		}
 		
-		
+*/		
 		
 		
 		
