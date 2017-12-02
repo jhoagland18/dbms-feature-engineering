@@ -27,22 +27,19 @@ public class Main {
 		purchases.addNumericalAttribute("online", false);
 		purchases.addNumericalAttribute("return", false);
 		purchases.addDateAttribute("date", false);
-		
-		
-		Table flight = new Table ("flight");
-		flight.addNumericalAttribute("flight_ID", true);
-		Table pilot = new Table("pilot");
-		pilot.addNumericalAttribute("pilot_ID", true);
-		Table cabin = new Table("cabin");
-		cabin.addNumericalAttribute("cabin_ID", true);
-		Table destination = new Table("destination");
-		destination.addNumericalAttribute("destination_ID", true);
 
-		sc.addTable(flight);
-		sc.addTable(route);
-		sc.addTable(pilot);
-		sc.addTable(cabin);
-		sc.addTable(destination);
+		Table products = new Table("Products");
+		products.addNumericalAttribute("product_id", true);
+		products.addNumericalAttribute("price", false);
+
+		Table clients = new Table("Clients");
+		clients.addNumericalAttribute("client_id", true);
+		clients.addNumericalAttribute("age", false);
+		clients.addCatagoricalAttribute("gender", false);
+		
+		sc.addTable(purchases);
+		sc.addTable(clients);
+		sc.addTable(products);
 		
 		sc.createRelationship(route.getPrimaryKey(), flight.addNumericalForeignKey("route_ID", route), Relationship.ONE_TO_ONE);
 		sc.createRelationship(flight.getPrimaryKey(), pilot.addNumericalForeignKey("flight_ID", flight), Relationship.ONE_TO_ONE);
