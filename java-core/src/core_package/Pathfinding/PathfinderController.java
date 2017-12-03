@@ -30,7 +30,15 @@ public class PathfinderController {
         this.targetTable = targetTable;
         for (Relationship rel : targetTable.getRelationships()) {
             Path p2 = new Path();
-            p2.addRelationship(rel);
+
+            Table nextLink = null;
+
+            if(rel.getTables()[0]!=targetTable)
+                nextLink = rel.getTables()[0];
+            else if(rel.getTables()[1]!=targetTable)
+                nextLink = rel.getTables()[1];
+
+            p2.addRelationship(rel, nextLink);
             try {
                 Pathfinder pf = new Pathfinder(this, toReturn, "Thread "+countThreads(), p2);
                 futures.add(executor.submit(pf));

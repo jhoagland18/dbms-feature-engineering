@@ -10,6 +10,7 @@ public class Pathfinder implements Runnable {
 
     private final ArrayList<Path> toReturn;
     private final int max_length;
+    private final Table targetTable;
     private final PathfinderController controller;
 
     private Thread pf;
@@ -23,6 +24,7 @@ public class Pathfinder implements Runnable {
         this.controller = controller;
         this.max_length = controller.getMaxLength();
         this.partial=partial;
+        this.targetTable=controller.getTargetTable();
 
         pf = new Thread(this, name);
     }
@@ -46,60 +48,45 @@ public class Pathfinder implements Runnable {
             return;
         }
 
+        if(partial.getLength()>1) {
+            createNewPaths(partial.getLastLink().getLastTable());
+        } else {
+            Table nextRelTable = null;
 
-        Table nextRelTable = null;
-
-        if (partial.getRelationships().size() > 1) { //if more than 1 relationship in path
-            Relationship secondToLast = partial.getSecondToLastRelationship();
-            Relationship last = partial.getLastRelationship();
-
-            /*
-            The block of code below identifies which table to build off of for the next relationship in partial.
-            */
-
-            if (last.getTables()[0] != secondToLast.getTables()[0] && last.getTables()[0] != secondToLast.getTables()[1]) { //check if table 1 was used in the previous relationship link
-                nextRelTable = last.getTables()[0];
-            } else if (last.getTables()[1] != secondToLast.getTables()[0] && last.getTables()[1] != secondToLast.getTables()[1]) { //check if table 2 was used in the previous relationship link
-                nextRelTable = last.getTables()[1];
+            if(partial.getLastRelationship().getTables()[0]!=targetTable) {
+                nextRelTable = partial.getLastRelationship().getTables()[0];
+            } else if(partial.getLastRelationship().getTables()[1]!=targetTable) {
+                nextRelTable = partial.getLastRelationship().getTables()[1];
             }
 
-            if (nextRelTable.getRelationships().size() > 1) {
-                createNewPaths(nextRelTable);
-            } else { //if previous relationship cannot be built off of.
-                synchronized (toReturn) {
-                    toReturn.add(partial);
-                }
-                return;
-            }
-
-        } else if (partial.getLength() == 1) { //if only one relationship in partial, build paths off of each table.
-
-            for(Table t : partial.getLastRelationship().getTables()) {
-                if(t!=controller.getTargetTable())
-                    if(t.getRelationships().size()>1)
-                        createNewPaths(t);
-                    else
-                        synchronized (toReturn) {
-                            toReturn.add(partial);
-                        }
-            }
+            createNewPaths(nextRelTable);
         }
+
+
     }
 
     public void createNewPaths(Table nextRelTable) {
         //iterates through relationships of next table in relationship and recursively calls createPaths to generate all partials
 
        for (Relationship rel : nextRelTable.getRelationships()) {
-           if (rel != partial.getLastRelationship()) { //add all relationships that are not the previous one used in partial
+           //if (rel != partial.getLastRelationship()) { //add all relationships that are not the previous one used in partial
+
+                Table nextLink = null;
+
+                if(rel.getTables()[0]!=nextRelTable)
+                    nextLink = rel.getTables()[0];
+                else if(rel.getTables()[1]!=nextRelTable)
+                    nextLink = rel.getTables()[1];
+
                Path p2 = new Path(this.partial);
-               p2.addRelationship(rel);
+               p2.addRelationship(rel, nextLink);
                Main.printVerbose(pf.getName()+" submitting "+p2.toString());
                try {
                    controller.enqueue(new Pathfinder(this.controller, this.toReturn, "Thread "+controller.countThreads(), p2));
                } catch (InterruptedException e) {
                    e.printStackTrace();
                }
-           }
+           //}
        }
 
     }
