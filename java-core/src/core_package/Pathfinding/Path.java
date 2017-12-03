@@ -56,10 +56,29 @@ public class Path {
 
 	public String toString() {
 
-		String s = "path: ";
+		String s = "";
 		for (PathLink rels : relationships) {
 			s += "[ "+rels.toString()+" ] ";
 		}
-		return s;
+		s+="\n";
+
+
+		for (int i = 0; i < relationships.size(); i++) {
+			PathLink link = relationships.get(i);
+			if(i==0) {
+				if(link.getRelationship().getTables()[0]!=link.getLastTable()) {
+					s+=link.getRelationship().getTables()[0]+ " -> ";
+				} else {
+					s+=link.getRelationship().getTables()[1]+ " -> ";
+				}
+			}
+
+			s+=link.getLastTable();
+
+			if(i < relationships.size()-1)
+				s+= " -> ";
+		}
+
+		return s+="\n";
 	}
 }

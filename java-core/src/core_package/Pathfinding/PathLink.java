@@ -26,5 +26,4 @@ public class PathLink {
     public String toString() {
         return rel.toString();
     }
-
 }

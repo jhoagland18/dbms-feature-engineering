@@ -23,8 +23,8 @@ public class Pathfinder implements Runnable {
 
         this.controller = controller;
         this.max_length = controller.getMaxLength();
-        this.partial=partial;
         this.targetTable=controller.getTargetTable();
+        this.partial=partial;
 
         pf = new Thread(this, name);
     }
@@ -39,7 +39,7 @@ public class Pathfinder implements Runnable {
     }
 
     public void buildPartials() throws InterruptedException { //adds paths to list parameter up to max_length
-        Main.printVerbose(pf.getName() + " partial: " + partial.toString()+" length "+partial.getLength()); //check path at run
+        Main.printVerbose(pf.getName() + " partial: " + partial.toString()+" length "+partial.getLength()); //print path at run
 
         if (partial.getLength() == max_length) { //if path is at max_length, add to toReturn and end recursive loop
             synchronized (toReturn) {
@@ -71,22 +71,25 @@ public class Pathfinder implements Runnable {
        for (Relationship rel : nextRelTable.getRelationships()) {
            //if (rel != partial.getLastRelationship()) { //add all relationships that are not the previous one used in partial
 
-                Table nextLink = null;
+           Path p2 = new Path(this.partial);
 
-                if(rel.getTables()[0]!=nextRelTable)
-                    nextLink = rel.getTables()[0];
-                else if(rel.getTables()[1]!=nextRelTable)
-                    nextLink = rel.getTables()[1];
+            Table nextLink = null;
 
-               Path p2 = new Path(this.partial);
-               p2.addRelationship(rel, nextLink);
-               Main.printVerbose(pf.getName()+" submitting "+p2.toString());
-               try {
-                   controller.enqueue(new Pathfinder(this.controller, this.toReturn, "Thread "+controller.countThreads(), p2));
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-           //}
+            if(rel.getTables()[0]!=nextRelTable)
+                nextLink = rel.getTables()[0];
+            else if(rel.getTables()[1]!=nextRelTable)
+                nextLink = rel.getTables()[1];
+
+           p2.addRelationship(rel, nextLink);
+
+           Main.printVerbose(pf.getName()+" submitting "+p2.toString());
+
+           try {
+               controller.enqueue(new Pathfinder(this.controller, this.toReturn, "Thread "+controller.countThreads(), p2));
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       //}
        }
 
     }

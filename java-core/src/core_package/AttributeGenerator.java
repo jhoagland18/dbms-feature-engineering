@@ -54,6 +54,5 @@ public class AttributeGenerator {
 			}
 		}
 		return queries;
-
 	}
 }
