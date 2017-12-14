@@ -54,7 +54,8 @@ public class Main {
 		
 		ArrayList<Path> paths = new ArrayList<Path>();
 		
-		sc.createPaths(paths, purchases, 5);
+		sc.createPaths(paths, purchases, 3);
+
 		AttributeGenerator ag = new AttributeGenerator();
 
 		System.out.println("number of paths found: " + paths.size());

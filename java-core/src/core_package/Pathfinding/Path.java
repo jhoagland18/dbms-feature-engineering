@@ -1,38 +1,52 @@
 package core_package.Pathfinding;
 
 import core_package.Schema.Relationship;
+import core_package.Schema.Table;
 
 import java.util.ArrayList;
 
 public class Path {
 
-	private ArrayList<Relationship> relationships;
+	private ArrayList<PathLink> relationships;
 	
 	public Path () {
-		relationships = new ArrayList<Relationship>();
+		relationships = new ArrayList<PathLink>();
 	}
 	public Path(Path p) {
-		relationships = new ArrayList<Relationship>(p.getRelationships());
+		relationships = new ArrayList<PathLink>(p.getLinks());
 	}
 	
-	public Path addRelationship(Relationship rel) {
-		relationships.add(rel);
+	public Path addRelationship(Relationship rel, Table last) {
+		PathLink link = new PathLink(rel, last);
+		relationships.add(link);
 		return this;
 	}
 	
 	public Relationship getLastRelationship() {
-		return relationships.get(relationships.size()-1);
+		return relationships.get(relationships.size()-1).getRelationship();
 	}
 
 	public Relationship getSecondToLastRelationship() {
-		return relationships.get(relationships.size()-2);
+		return relationships.get(relationships.size()-2).getRelationship();
+	}
+
+	public PathLink getLastLink() {
+		return relationships.get(relationships.size()-1);
 	}
 
 	public Relationship getRelationship(int i) {
-		return relationships.get(i);
+		return relationships.get(i).getRelationship();
 	}
 	
 	public ArrayList<Relationship> getRelationships() {
+		ArrayList<Relationship> rels = new ArrayList<>();
+		for(PathLink link : relationships) {
+			rels.add(link.getRelationship());
+		}
+		return rels;
+	}
+
+	public ArrayList<PathLink> getLinks() {
 		return relationships;
 	}
 
@@ -42,10 +56,29 @@ public class Path {
 
 	public String toString() {
 
-		String s = "path: ";
-		for (Relationship rels : relationships) {
+		String s = "";
+		for (PathLink rels : relationships) {
 			s += "[ "+rels.toString()+" ] ";
 		}
-		return s;
+		s+="\n";
+
+
+		for (int i = 0; i < relationships.size(); i++) {
+			PathLink link = relationships.get(i);
+			if(i==0) {
+				if(link.getRelationship().getTables()[0]!=link.getLastTable()) {
+					s+=link.getRelationship().getTables()[0]+ " -> ";
+				} else {
+					s+=link.getRelationship().getTables()[1]+ " -> ";
+				}
+			}
+
+			s+=link.getLastTable();
+
+			if(i < relationships.size()-1)
+				s+= " -> ";
+		}
+
+		return s+="\n";
 	}
 }
