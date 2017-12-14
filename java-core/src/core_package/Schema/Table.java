@@ -1,143 +1,153 @@
 package core_package.Schema;
 
 import core_package.Schema.Attribute.*;
-import core_package.Main;
-import javax.naming.NameAlreadyBoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Table {
 	private String name;
 	private ArrayList<Attribute> attributes;
 	private ArrayList<Relationship> relationships;
-	private ArrayList<Attribute> foreignKeys;
+	private ArrayList<Attribute> primaryKey;
+	private HashMap<String,Attribute> attributeByName;
+	private HashMap<String,ArrayList<Attribute> > attributesByDimension;
+	private HashMap<Class<? extends Attribute>,ArrayList<Attribute> > attributesByType;
 
-	private Attribute primaryKey=null;
-
+	// GETTER METHODS
+	
+	/**
+	 * 
+	 * @return the name of the table.
+	 */
+	public String getName() {return name;}
+	
+	/**
+	 * 
+	 * @return all attributes.
+	 */
+	public ArrayList<Attribute> getAttributes() {return attributes;}
+	
+	/**
+	 * 
+	 * @return all outgoing relationships.
+	 */
+	public  ArrayList<Relationship> getRelationships() {return relationships;}
+	
+	/**
+	 * 
+	 * @return the primary key
+	 */
+	public  ArrayList<Attribute> getPrimaryKey() {return primaryKey;}
+	
+	/**
+	 * 
+	 * @param name the name of the attribute
+	 * @return the attribute with that name
+	 */
+	public  Attribute getAttributeByName(String name) {return attributeByName.get(name);}
+	
+	/**
+	 * 
+	 * @param dimension
+	 * @return all attributes with the given dimension
+	 */
+	public  ArrayList<Attribute> getAttributesByDimension(String dimension) {
+		if (!attributesByDimension.containsKey(dimension))
+			return new ArrayList<Attribute>();
+		else
+			
+			return attributesByDimension.get(dimension);
+	}
+	
+	/**
+	 * 
+	 * @param attType the subclass of attribute to look for.
+	 * @return all attributes with the given type
+	 */
+	public  ArrayList<Attribute> getAttributesByType(Class<? extends Attribute> attType){
+		if (!attributesByType.containsKey(attType))
+			return new ArrayList<Attribute>();
+		else
+			
+			return attributesByType.get(attType);	
+	}
+	
+	
+	// CONSTRUCTOR
+	
 	public Table(String name) {
 		this.name=name;
 		attributes = new ArrayList<Attribute>();
 		relationships = new ArrayList<Relationship>();
-		foreignKeys = new ArrayList<Attribute>();
+		primaryKey = new ArrayList<Attribute>();
+		attributeByName = new 	HashMap<String,Attribute>();
+		attributesByDimension = new HashMap<String,ArrayList<Attribute>>();
+		attributesByType = new HashMap<Class<? extends Attribute>,ArrayList<Attribute>>();
 	}
 
-	public NumericalAttribute addNumericalAttribute(String attributeName, boolean isPrimaryKey) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
-			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
+	/**
+	 * Add an attribute to the table.
+	 * @param att the attribute to add.
+	 * @throws Exception if an attribute with the same name is already present.
+	 */
+	public void addAttribute(Attribute att) throws Exception {
+		if (attributeByName.containsKey(att.getAttributeName()))
+			throw new Exception("Attribute " + att.getAttributeName() + " already present in table " + name);
+		
+		String attName = att.getAttributeName();
+		String attDim = att.getDimension();
+		Class<? extends Attribute> attClass = att.getClass();
+		attributes.add(att);
+		
+		// name
+		attributeByName.put(attName, att);
+
+		// dim
+		if (att.getClass() == NominalAttribute.class || att.getClass() == NumericAttribute.class) {
+			if (!attributesByDimension.containsKey(attDim))
+				attributesByDimension.put(attDim, new ArrayList<Attribute>());
+			attributesByDimension.get(attDim).add(att);
 		}
-		if (isPrimaryKey && primaryKey != null) {
-			return null;
-		} else {
-			NumericalAttribute a = new NumericalAttribute(attributeName, isPrimaryKey, this);
-			if (isPrimaryKey) {
-				primaryKey = a;
-			}
-			return a;
+		
+		// type
+		if (!attributesByType.containsKey(attClass))
+			attributesByType.put(attClass, new ArrayList<Attribute>());
+		attributesByType.get(attClass).add(att);
+	}
+	
+	/**
+	 * Defines a single-attribute primary key.
+	 * @param att
+	 * @throws Exception 
+	 */
+	public void setPrimaryKey(Attribute att) throws Exception {
+		ArrayList<Attribute> attributesList = new ArrayList<>();
+		attributesList.add(att);
+		setPrimaryKey(attributesList);
+	}
+	
+	/**
+	 * Defines a multiple-attribute primary key.
+	 * @param attributesList
+	 * @throws Exception if trying to set a non-ID attribute as part of the primary key 
+     */
+	public void setPrimaryKey(ArrayList<Attribute> attributesList ) throws Exception  {
+		this.primaryKey = new ArrayList<>();
+		for (Attribute att : attributesList) {
+			if (att.getClass() != IDAttribute.class)
+				throw new Exception("Attribute " + att.getAttributeName() + " cannot be part of a primary key because it is not of type ID");
+			primaryKey.add(att);
 		}
 	}
 
-	public CategoricalAttribute addCatagoricalAttribute(String attributeName, boolean isPrimaryKey) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
-			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
-		}
-		if(isPrimaryKey && primaryKey!=null) {
-			return null;
-		} else {
-			CategoricalAttribute a = new CategoricalAttribute(attributeName, isPrimaryKey, this);
-			if(isPrimaryKey) {
-				primaryKey=a;
-			}
-			return a;
-		}
-	}
-
-	public DateAttribute addDateAttribute(String attributeName, boolean isPrimaryKey) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
-			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
-		}
-		if(isPrimaryKey && primaryKey!=null) {
-			return null;
-		} else {
-			DateAttribute a = new DateAttribute(attributeName, isPrimaryKey, this);
-			if(isPrimaryKey) {
-				primaryKey=a;
-			}
-			return a;
-		}
-	}
-	
-	public NumericalAttribute addNumericalForeignKey(String attributeName, Table link) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
-			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
-		}
-		ForeignKeyNumericalAttribute a = new ForeignKeyNumericalAttribute(attributeName, this, link);
-		foreignKeys.add(a);
-		return a;
-	}
-
-	public CategoricalAttribute addCategoricalForeignKey(String attributeName, Table link) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
-			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
-		}
-		ForeignKeyCategoricalAttribute a = new ForeignKeyCategoricalAttribute(attributeName, this, link);
-		foreignKeys.add(a);
-		return a;
-	}
-
-	public DateAttribute addDateForignKey(String attributeName, Table link) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
-			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
-		}
-		ForeignKeyDateAttribute a = new ForeignKeyDateAttribute(attributeName, this, link);
-		foreignKeys.add(a);
-		return a;
-	}
-	
-	public void addRelationship (Relationship rel) {
-		//Relationship rel = new Relationship(targetTable, attribute);
-		relationships.add(rel);
-		Main.printVerbose("Adding relationship for table: " + name);
-	}
-	
-	public String getTableName() {
-		return name;
-	}
-	
-	public boolean isPrimaryKeySet() {
-		return primaryKey!=null;
-	}
-	
-	public ArrayList<Relationship> getRelationships () {
-		return relationships;
-	}
-	
-	public String toString() {
-		return name;
-	}
-
-	public Attribute getAttribute(String name) {
-		for(Attribute a : attributes) {
-			if(a.getAttributeName().equals(name))
-				return a;
-		}
-		return null;
-	}
-	public ArrayList<Attribute> getAttributes() {
-		return attributes;
-	}
-	
-	public Attribute getPrimaryKey() {
-		return primaryKey;
-	}
-	
-	public ArrayList<Attribute> getForeignKeys() {
-		return foreignKeys;
-	}
-
-	public boolean checkIfAttributeNameAlreadyExists(String name) {
-		for(Attribute a : attributes) {
-			if(a.getAttributeName().equals(name))
-				return true;
-		}
-		return false;
+	/**
+	 * adds an outgoing relationship to the table.
+	 * @param rel 
+	 * @throws Exception if the table of the left in rel is not this table.
+	 */
+	public void addRelationship(Relationship rel) throws Exception{
+		if (rel.getTable1() != this)
+			throw new Exception ("Table1 is not set correctly");
+		this.relationships.add(rel);
 	}
 }

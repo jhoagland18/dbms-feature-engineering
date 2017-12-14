@@ -1,0 +1,30 @@
+package core_package.Schema;
+
+import java.util.ArrayList;
+
+public class NumericAttribute extends Attribute {
+	
+	ArrayList<Double> binThresholds;
+	
+	/**
+	 * 
+	 * @return the bin thresholds used in where conditions
+	 */
+	public ArrayList<Double> getBinThresholds() {
+		return binThresholds;
+	}
+	
+	/**
+	 * 
+	 * @param attributeName
+	 * @param parentTable
+	 * @param binThresholds the bin thresholds used in where conditions. They must be sorted in ascending order. 
+	 * If for instance, binThreholds is composed of v1,v2,v3,v4, the where conditions generated will be 
+	 * x &lt v1, v1 &lt= x &lt v2, v2 &lt= x &lt v3, v3 &lt= x &lt v4, x &gt v4
+	 */
+	public NumericAttribute(String attributeName, String dimension, Table parentTable, ArrayList<Double> binThresholds)  {
+		super(attributeName,dimension, parentTable);
+		this.binThresholds = binThresholds;
+	}
+
+}
