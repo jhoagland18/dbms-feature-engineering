@@ -42,7 +42,28 @@ public class Relationship {
 	public RelationshipType getRelationshipType() {return type;}
 	
 	/**
-	 * 
+	 * adds a relationship with single FKs 
+	 * @param table1 the table on the "left" side
+	 * @param table2 the table on the "right" side
+	 * @param attribute1 the key used for the join in table1
+	 * @param attribute2 the key used for the join in table2
+	 * @param relType the relationship type
+	 */
+	public Relationship (Table table1, Table table2, IDAttribute attribute1,IDAttribute attribute2, RelationshipType relType) {
+		
+		this.attributes1=new ArrayList<>();
+		this.attributes1.add(attribute1);
+		this.attributes2=new ArrayList<>();
+		this.attributes2.add(attribute2);
+
+		this.table1 = table1;
+		this.table2 = table2;
+		
+		this.type = relType;
+	}
+
+	/**
+	 * adds a relationship with composite FKs 
 	 * @param table1 the table on the "left" side
 	 * @param table2 the table on the "right" side
 	 * @param attributes1 the keys used for the joins in table1

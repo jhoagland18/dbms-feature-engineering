@@ -1,84 +1,49 @@
 package core_package.Pathfinding;
-
-import core_package.Schema.Relationship;
-import core_package.Schema.Table;
-
 import java.util.ArrayList;
 
+import core_package.Schema.*;
+
 public class Path {
-
-	private ArrayList<PathLink> relationships;
 	
-	public Path () {
-		relationships = new ArrayList<PathLink>();
-	}
-	public Path(Path p) {
-		relationships = new ArrayList<PathLink>(p.getLinks());
-	}
-	
-	public Path addRelationship(Relationship rel, Table last) {
-		PathLink link = new PathLink(rel, last);
-		relationships.add(link);
-		return this;
-	}
-	
-	public Relationship getLastRelationship() {
-		return relationships.get(relationships.size()-1).getRelationship();
-	}
+	private ArrayList<Table> tables;
+	public ArrayList<Table> getTables() {
+		return tables;
+	};
 
-	public Relationship getSecondToLastRelationship() {
-		return relationships.get(relationships.size()-2).getRelationship();
-	}
-
-	public PathLink getLastLink() {
-		return relationships.get(relationships.size()-1);
-	}
-
-	public Relationship getRelationship(int i) {
-		return relationships.get(i).getRelationship();
-	}
-	
+	private ArrayList<Relationship> relationships;
 	public ArrayList<Relationship> getRelationships() {
-		ArrayList<Relationship> rels = new ArrayList<>();
-		for(PathLink link : relationships) {
-			rels.add(link.getRelationship());
-		}
-		return rels;
-	}
-
-	public ArrayList<PathLink> getLinks() {
 		return relationships;
-	}
+	};
 
-	public int getLength() {
-		return relationships.size();
+	
+	public Path(Table first) {
+		tables = new ArrayList<>();
+		relationships = new ArrayList<>();
+		tables.add(first);
 	}
-
+	
+	public void addRelationship(Relationship r) {
+		relationships.add(r);
+		tables.add(r.getTable2());
+	}
+	
+	public Table getHead() {return tables.get(tables.size() - 1);}
+	
+	public int getLength() {return tables.size();}
+	
+	public Path Copy() {
+		Path toReturn = new Path(tables.get(0));
+		for (int i=1;i<tables.size();i++)
+			toReturn.getTables().add(tables.get(i));
+		for (Relationship t : relationships)
+			toReturn.getRelationships().add(t);
+		return toReturn;
+	}
+	
 	public String toString() {
-
-		String s = "";
-		for (PathLink rels : relationships) {
-			s += "[ "+rels.toString()+" ] ";
-		}
-		s+="\n";
-
-
-		for (int i = 0; i < relationships.size(); i++) {
-			PathLink link = relationships.get(i);
-			if(i==0) {
-				if(link.getRelationship().getTables()[0]!=link.getLastTable()) {
-					s+=link.getRelationship().getTables()[0]+ " -> ";
-				} else {
-					s+=link.getRelationship().getTables()[1]+ " -> ";
-				}
-			}
-
-			s+=link.getLastTable();
-
-			if(i < relationships.size()-1)
-				s+= " -> ";
-		}
-
-		return s+="\n";
+		String res = "";
+		for (int i =0;i<tables.size()-1;i++)
+			res += tables.get(i).getName() + "->";
+		return res + getHead().getName();
 	}
 }

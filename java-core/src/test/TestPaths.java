@@ -1,14 +1,32 @@
-package core_package;
+package test;
 
-import core_package.Pathfinding.*;
-import core_package.Schema.*;
 
 import java.util.ArrayList;
 
-//Created by Michele Samorani, Gayatri Krishnan, and Jackson Hoagland during academic research with Santa Clara University on 9/29/2017
- 
-public class Main {
-	public static void main (String [] args) throws Exception {
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import core_package.Pathfinding.Path;
+import core_package.Pathfinding.PathGenerator;
+import core_package.Schema.IDAttribute;
+import core_package.Schema.Relationship;
+import core_package.Schema.RelationshipType;
+import core_package.Schema.Table;
+
+class TestPaths {
+
+	@BeforeEach
+	void setUp() throws Exception {
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+	}
+
+	@Test
+	void testPaths() throws Exception {
 		Table purchases = new Table("Purchases");
 		purchases.addAttribute(new IDAttribute("Purchase_ID", purchases));
 		purchases.addAttribute(new IDAttribute("Client_ID", purchases));
@@ -34,8 +52,7 @@ public class Main {
 				(IDAttribute)purchases.getAttributeByName("Product_ID"),RelationshipType.ToN));
 		
 		ArrayList<Path> paths = PathGenerator.GeneratePaths(4, purchases);
-		for (Path p : paths)
-			System.out.println(p.toString());
+		
+		Assertions.assertEquals(6,paths.size());
 	}
-
 }

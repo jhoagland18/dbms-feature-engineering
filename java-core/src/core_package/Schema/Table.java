@@ -1,6 +1,5 @@
 package core_package.Schema;
 
-import core_package.Schema.Attribute.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
