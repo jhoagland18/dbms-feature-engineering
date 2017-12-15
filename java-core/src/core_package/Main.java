@@ -10,15 +10,15 @@ import java.util.ArrayList;
 public class Main {
 	public static void main (String [] args) throws Exception {
 		Table purchases = new Table("Purchases");
-		purchases.addAttribute(new IDAttribute("Purchase_ID", purchases));
-		purchases.addAttribute(new IDAttribute("Client_ID", purchases));
-		purchases.addAttribute(new IDAttribute("Product_ID", purchases));
+		purchases.addAttribute(new IDAttribute("Purchase_ID"));
+		purchases.addAttribute(new IDAttribute("Client_ID"));
+		purchases.addAttribute(new IDAttribute("Product_ID"));
 		
 		Table clients = new Table("Clients");
-		clients.addAttribute(new IDAttribute("Client_ID", clients));
+		clients.addAttribute(new IDAttribute("Client_ID"));
 		
 		Table products = new Table("Products");
-		products.addAttribute(new IDAttribute("Product_ID", products));
+		products.addAttribute(new IDAttribute("Product_ID"));
 		
 		purchases.addRelationship(new Relationship(purchases, clients, 
 				(IDAttribute)purchases.getAttributeByName("Client_ID"), 

@@ -22,13 +22,12 @@ public class TimeStampAttribute extends Attribute {
 	/**
 	 * 
 	 * @param attributeName
-	 * @param parentTable
 	 * @param binThresholds the bin thresholds used in where conditions involving two timestamps t1 and t2 of the same dimension. They must be sorted in ascending order. 
 	 * If for instance, binThreholds is composed of v1,v2,v3,v4, the where conditions generated will be 
 	 * t1-t2 &lt v1, v1 &lt= t1-t2 &lt v2, v2 &lt= t1-t2 &lt v3, v3 &lt= t1-t2 &lt v4, t1-t2 &gt v4
 	 */
-	public TimeStampAttribute(String attributeName, Table parentTable, ArrayList<Period> binThresholds)  {
-		super(attributeName,"timestamp", parentTable);
+	public TimeStampAttribute(String attributeName, ArrayList<Period> binThresholds)  {
+		super(attributeName,"timestamp");
 		this.binThresholds = binThresholds;
 	}
 

@@ -7,8 +7,8 @@ package core_package.Schema;
  */
 public class IDAttribute extends Attribute {
 	
-	public IDAttribute(String attributeName, Table parentTable)  {
-		super(attributeName,"", parentTable);
+	public IDAttribute(String attributeName)  {
+		super(attributeName,"");
 	}
 
 }

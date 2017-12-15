@@ -17,13 +17,12 @@ public class NumericAttribute extends Attribute {
 	/**
 	 * 
 	 * @param attributeName
-	 * @param parentTable
 	 * @param binThresholds the bin thresholds used in where conditions. They must be sorted in ascending order. 
 	 * If for instance, binThreholds is composed of v1,v2,v3,v4, the where conditions generated will be 
 	 * x &lt v1, v1 &lt= x &lt v2, v2 &lt= x &lt v3, v3 &lt= x &lt v4, x &gt v4
 	 */
-	public NumericAttribute(String attributeName, String dimension, Table parentTable, ArrayList<Double> binThresholds)  {
-		super(attributeName,dimension, parentTable);
+	public NumericAttribute(String attributeName, String dimension, ArrayList<Double> binThresholds)  {
+		super(attributeName,dimension);
 		this.binThresholds = binThresholds;
 	}
 

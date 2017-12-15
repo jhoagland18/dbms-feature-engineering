@@ -20,8 +20,8 @@ public class NominalAttribute extends Attribute {
 	 * @param parentTable
 	 * @param importantValues the values used in where conditions.
 	 */
-	public NominalAttribute(String attributeName, String dimension,Table parentTable, ArrayList<String> importantValues)  {
-		super(attributeName,dimension, parentTable);
+	public NominalAttribute(String attributeName, String dimension, ArrayList<String> importantValues)  {
+		super(attributeName,dimension);
 		this.importantValues = importantValues;
 	}
 

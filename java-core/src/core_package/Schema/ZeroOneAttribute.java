@@ -7,8 +7,8 @@ package core_package.Schema;
  */
 public class ZeroOneAttribute extends Attribute {
 	
-	public ZeroOneAttribute(String attributeName, Table parentTable)  {
-		super(attributeName,"zero-one", parentTable);
+	public ZeroOneAttribute(String attributeName)  {
+		super(attributeName,"zero-one");
 	}
 
 }
