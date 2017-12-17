@@ -2,55 +2,36 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import core_package.Schema.*;
-import junit.framework.Assert;
+import core_package.Schema.Attribute;
+import core_package.Schema.IDAttribute;
+import core_package.Schema.NominalAttribute;
+import core_package.Schema.NumericAttribute;
+import core_package.Schema.Relationship;
+import core_package.Schema.RelationshipType;
+import core_package.Schema.Table;
+import core_package.Schema.TimeStampAttribute;
+import core_package.Schema.ZeroOneAttribute;
+import core_package.Pathfinding.Path;
+import core_package.QueryTemplates.*;
 
-import java.time.Period;
-import java.util.ArrayList;
+class TestQueryTemplates {
 
-class TestSchemaPackage {
-
+	Table purchases;
+	Path p;
+	
 	@BeforeEach
 	void setUp() throws Exception {
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-	}
-
-	@Test
-	void oneTableTest() throws Exception {
 		// PURCHASES
-		Table purchases = new Table("Purchases");
-		purchases.addAttribute(new IDAttribute("PurchaseID"));
-		purchases.addAttribute(new IDAttribute("ClientID"));
-		purchases.addAttribute(new IDAttribute("ProductID"));
-		purchases.addAttribute(new ZeroOneAttribute("Return"));
-		
-		ArrayList<Period> periods = new ArrayList<>();
-		
-		periods.add(Period.ofMonths(1));
-		periods.add(Period.ofWeeks(2));
-		purchases.addAttribute(new TimeStampAttribute("Date",periods));
-		purchases.setPrimaryKey(purchases.getAttributeByName("PurchaseID"));
-		Assertions.assertEquals(5, purchases.getAttributes().size());
-		Assertions.assertEquals(3, purchases.getAttributesByType(IDAttribute.class).size());
-		Assertions.assertEquals(1, purchases.getAttributesByType(TimeStampAttribute.class).size());
-		Assertions.assertEquals(1, purchases.getAttributesByType(ZeroOneAttribute.class).size());
-		Assertions.assertEquals(0, purchases.getAttributesByType(NumericAttribute.class).size());
-		Assertions.assertEquals(0, purchases.getAttributesByType(NominalAttribute.class).size());
-		Assertions.assertEquals(0, purchases.getAttributesByDimension("").size());
-	}
-
-	@Test
-	void wholeDB() throws Exception {
-		// PURCHASES
-		Table purchases = new Table("Purchases");
+		purchases = new Table("Purchases");
 		purchases.addAttribute(new IDAttribute("PurchaseID"));
 		purchases.addAttribute(new IDAttribute("ClientID"));
 		purchases.addAttribute(new IDAttribute("ProductID"));
@@ -100,6 +81,65 @@ class TestSchemaPackage {
 		products.addRelationship(new Relationship(products, purchases, 
 				(IDAttribute)products.getAttributeByName("Product_ID"),
 				(IDAttribute)purchases.getAttributeByName("Product_ID"),RelationshipType.ToN));
-}
+		
+		p = new Path(purchases);
+		p.addRelationship(purchases.getRelationships().get(0)); // PU -> CL
+		p.addRelationship(p.getHead().getRelationships().get(0)); // PU -> CL -> PU
+			}
 
+	@AfterEach
+	void tearDown() throws Exception {
+	}
+
+	@Test
+	void testPathMatch() {
+		PathConstraints c1 = new PathConstraints();
+		c1.addRelationship(RelationshipType.To1);
+		c1.addRelationship(RelationshipType.ToN);		
+		Assertions.assertEquals(true, c1.matches(p));
+		
+		c1 = new PathConstraints();
+		c1.addRelationship(RelationshipType.To1);
+		c1.addRelationship(RelationshipType.ToN);		
+		c1.addRelationship(RelationshipType.To1);		
+		Assertions.assertEquals(false, c1.matches(p));
+
+		c1 = new PathConstraints();
+		c1.addRelationship(RelationshipType.To1);
+		c1.addRelationship(RelationshipType.To1);		
+		Assertions.assertEquals(false, c1.matches(p));
+		
+		c1 = new PathConstraints();
+		c1.addRelationship(RelationshipType.To1);
+		c1.addRelationship(RelationshipType.ToN);
+		c1.addDifferentFromConstraint(0, 2);
+		Assertions.assertEquals(false, c1.matches(p));
+		
+		c1 = new PathConstraints();
+		c1.addRelationship(RelationshipType.To1);
+		c1.addRelationship(RelationshipType.ToN);
+		c1.addEqualToConstraint(0, 2);
+		Assertions.assertEquals(true, c1.matches(p));
+		
+		c1 = new PathConstraints();
+		c1.addRelationship(RelationshipType.To1);
+		c1.addRelationship(RelationshipType.ToN);
+		c1.addDifferentFromConstraint(0, 1);
+		Assertions.assertEquals(true, c1.matches(p));
+	}
+	
+	@Test
+	void testPKTransformation() {
+		PK_FunctionTransformer tr = new PK_FunctionTransformer();
+		String original = "PK(T0,t)";
+		HashMap <String, Table> tableDict = new HashMap<>();
+		tableDict.put("T0", purchases);
+		HashMap <String, Attribute> attributeDict = new HashMap<>();
+		String res = tr.Transform(original, tableDict, attributeDict, p);
+		Assertions.assertEquals("t.PurchaseID", res);
+		
+		original = "PK ( T0 , t )";
+		res = tr.Transform(original, tableDict, attributeDict, p);
+		Assertions.assertEquals("t.PurchaseID", res);
+	}
 }
