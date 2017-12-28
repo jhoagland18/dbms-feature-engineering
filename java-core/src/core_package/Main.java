@@ -1,25 +1,71 @@
 package core_package;
 
-import core_package.Pathfinding.*;
+import core_package.QueryGeneration.DB2PrologLoader;
+import core_package.QueryGeneration.Query;
+import core_package.QueryGeneration.QueryBuilder;
 import core_package.Schema.*;
 
+import java.time.Period;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-//Created by Michele Samorani, Gayatri Krishnan, and Jackson Hoagland during academic research with Santa Clara University on 9/29/2017
+import com.ugos.jiprolog.engine.*;
+
+//Created by Jackson Hoagland, Gayatri Krishnan, and Michele Samorani, during academic research with Santa Clara University on 9/29/2017
  
 public class Main {
+	static ArrayList<Table> tables = new ArrayList<>();
+	static ArrayList<Relationship> relationships = new ArrayList<>();
+	
 	public static void main (String [] args) throws Exception {
+		loadTables();
+		JIPEngine eng = DB2PrologLoader.LoadDB(
+				"..\\prolog\\functions.pl",
+				tables, relationships);
+		eng.setDebug(false);
+		eng.setUserOutputStream(null);
+		eng.setCurrentOutputStream(null, 0);
+		eng.setTrace(false);
+
+		ArrayList<Query> queries= QueryBuilder.buildQueries("Clients", "..\\prolog\\query templates\\toN.txt", eng);
+		for (Query q : queries)
+			System.out.println(q.getSQL());
+	}
+
+	private static void loadTables() throws Exception {
 		Table purchases = new Table("Purchases");
 		purchases.addAttribute(new IDAttribute("Purchase_ID"));
+		purchases.setPrimaryKey(new IDAttribute("Purchase_ID"));
 		purchases.addAttribute(new IDAttribute("Client_ID"));
 		purchases.addAttribute(new IDAttribute("Product_ID"));
+		ArrayList<Period> periods = new ArrayList<>();
+		periods.add(Period.ofMonths(1));
+		periods.add(Period.ofMonths(2));
+		periods.add(Period.ofMonths(12));
+		purchases.addAttribute(new TimeStampAttribute("date", periods));
+		purchases.addAttribute(new ZeroOneAttribute("return"));
+		purchases.addAttribute(new ZeroOneAttribute("online"));
 		
 		Table clients = new Table("Clients");
 		clients.addAttribute(new IDAttribute("Client_ID"));
+		clients.setPrimaryKey(new IDAttribute("Client_ID"));
+		ArrayList<Double> binsAge = new ArrayList<>();
+		binsAge.add(0.0); binsAge.add(20.0); binsAge.add(30.0); binsAge.add(40.0); binsAge.add(50.0);
+		binsAge.add(60.0); binsAge.add(100000.0); 
+		clients.addAttribute(new NumericAttribute("age", "years", binsAge));
+		ArrayList<String> gvalues = new ArrayList<>(); gvalues.add("M");gvalues.add("F");
+		clients.addAttribute(new NominalAttribute("gender", "gender", gvalues));
 		
 		Table products = new Table("Products");
 		products.addAttribute(new IDAttribute("Product_ID"));
-		
+		products.setPrimaryKey(new IDAttribute("Product_ID"));
+		ArrayList<Double> binsPrice = new ArrayList<>();
+		binsPrice.add(0.0); binsPrice.add(20.0); binsPrice.add(100.0); binsPrice.add(200.0);binsPrice.add(1000.0); binsPrice.add(1000000.0);
+		products.addAttribute(new NumericAttribute("price", "dollars", binsPrice));
+
 		purchases.addRelationship(new Relationship(purchases, clients, 
 				(IDAttribute)purchases.getAttributeByName("Client_ID"), 
 				(IDAttribute)clients.getAttributeByName("Client_ID"),RelationshipType.To1));
@@ -33,9 +79,12 @@ public class Main {
 				(IDAttribute)products.getAttributeByName("Product_ID"),
 				(IDAttribute)purchases.getAttributeByName("Product_ID"),RelationshipType.ToN));
 		
-		ArrayList<Path> paths = PathGenerator.GeneratePaths(4, purchases);
-		for (Path p : paths)
-			System.out.println(p.toString());
+		tables.add(purchases);
+		tables.add(clients);
+		tables.add(products);
+		for (Table t : tables) 
+			for (Relationship r : t.getRelationships())
+				relationships.add(r);
 	}
 
 }

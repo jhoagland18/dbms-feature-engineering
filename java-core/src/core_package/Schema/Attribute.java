@@ -38,5 +38,9 @@ public class Attribute {
 		this.dimension=dimension;
 	}
 	
+	@Override
+	public String toString() {
+		return getAttributeName();
+	}
 
 }

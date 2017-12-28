@@ -1,0 +1,13 @@
+Complexity=1,
+relationship(T0,T1,FK0,FK1,toN),
+attribute(T1,A,TypeOfA,B),
+in(TypeOfA,[zero_one,numeric]),
+in(Agg,['MIN','MAX','AVG','SUM']),
+my_atom_concat(['The ',Agg,' ', A,' of the ',T1,' of ',T0],Description),
+sql_unpackPK(T0,'t0',OutPK),
+sql_ON('t0','t1',FK0,FK1,'',OutFK),
+my_atom_concat([' \
+SELECT ', OutPK, ', ', Agg,'(t1.',A,  ')', ' \
+FROM ',T0,' t0\n',' \
+LEFT OUTER JOIN ',T1,' t1\n','ON ',OutFK,' \
+GROUP BY ',OutPK], Query).

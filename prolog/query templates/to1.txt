@@ -1,0 +1,13 @@
+% select zero_one,numeric,and nominal from t0 join t1
+Complexity=1,
+relationship(T0,T1,FK0,FK1,to1),
+attribute(T1,A,TypeOfA,B),
+in(TypeOfA,[zero_one,numeric,nominal]),
+my_atom_concat(['The ',A,' of the ',T1,'\n'],Description),
+sql_unpackPK(T0,'t0',OutPK),
+sql_ON('t0','t1',FK0,FK1,'',OutFK),
+my_atom_concat([' \
+SELECT ', OutPK, ', t1.',A,'\n',' \
+FROM ',T0,' t0\n',' \
+LEFT OUTER JOIN ',T1,' t1\n','ON ',OutFK], Query).
+

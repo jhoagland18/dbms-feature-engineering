@@ -1,6 +1,11 @@
-package core_package.QueryTemplates;
+package core_package.QueryGeneration;
 
 public class Query {
+	private String Description;
+	public String getDescription() {
+		return Description;
+	}
+	
 	private String SQL;
 	public String getSQL() {
 		return SQL;
@@ -11,8 +16,9 @@ public class Query {
 		return complexity;
 	}
 	
-	public Query(String SQL, Double complexity) {
+	public Query(String SQL, Double complexity, String description) {
 		this.SQL = SQL;
 		this.complexity = complexity;
+		this.Description = description;
 	}
 }

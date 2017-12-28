@@ -79,5 +79,10 @@ public class Relationship {
 		
 		this.type = relType;
 	}
+	
+	@Override
+	public String toString() {
+		return type == RelationshipType.To1? "to1":"toN";
+	}
 
 }

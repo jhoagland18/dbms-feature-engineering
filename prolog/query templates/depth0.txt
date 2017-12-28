@@ -1,0 +1,10 @@
+% attributes in the target table
+Complexity=0,
+attribute(T0,A,TypeOfA,_),
+in(TypeOfA,[zero_one,numeric,nominal]),
+my_atom_concat(['The ',A,' of ',T0],Description),
+sql_unpackPK(T0,'t0',OutPK),
+my_atom_concat([' \
+SELECT ', OutPK, ', t0.',A,'\n',' \
+FROM ',T0,' t0'], Query).
+
