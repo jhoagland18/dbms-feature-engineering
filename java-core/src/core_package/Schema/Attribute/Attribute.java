@@ -1,6 +1,5 @@
 package core_package.Schema.Attribute;
 
-import core_package.Main;
 import core_package.Schema.Table;
 
 public class Attribute {
@@ -18,6 +17,10 @@ public class Attribute {
 		this.parentTable=t;
 		this.isPrimaryKey=isPKey;
 	}
+
+	public void setParentTable(Table t) {
+	    parentTable = t;
+    }
 	
 	public String getAttributeName() {
 		return name;
@@ -29,5 +32,9 @@ public class Attribute {
 
 	public Table getParentTable() {
 		return parentTable;
+	}
+
+	public String toString() {
+		return name;
 	}
 }

@@ -20,8 +20,17 @@ public class Table {
 		foreignKeys = new ArrayList<Attribute>();
 	}
 
+	public void addAttribute(Attribute a) throws NameAlreadyBoundException {
+		if(checkIfAttributeNameAlreadyExists(a.getAttributeName())) {
+			throw new NameAlreadyBoundException("An attribute with name " + a.getAttributeName() + " already exists in " + this.getTableName());
+		} else {
+			attributes.add(a);
+			a.setParentTable(this);
+		}
+	}
+
 	public NumericalAttribute addNumericalAttribute(String attributeName, boolean isPrimaryKey) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
+		if(checkIfAttributeNameAlreadyExists(attributeName)) {
 			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
 		}
 		if (isPrimaryKey && primaryKey != null) {
@@ -31,12 +40,13 @@ public class Table {
 			if (isPrimaryKey) {
 				primaryKey = a;
 			}
+			attributes.add(a);
 			return a;
 		}
 	}
 
 	public CategoricalAttribute addCatagoricalAttribute(String attributeName, boolean isPrimaryKey) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
+		if(checkIfAttributeNameAlreadyExists(attributeName)) {
 			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
 		}
 		if(isPrimaryKey && primaryKey!=null) {
@@ -46,12 +56,13 @@ public class Table {
 			if(isPrimaryKey) {
 				primaryKey=a;
 			}
+			attributes.add(a);
 			return a;
 		}
 	}
 
 	public DateAttribute addDateAttribute(String attributeName, boolean isPrimaryKey) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
+		if(checkIfAttributeNameAlreadyExists(attributeName)) {
 			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
 		}
 		if(isPrimaryKey && primaryKey!=null) {
@@ -61,12 +72,13 @@ public class Table {
 			if(isPrimaryKey) {
 				primaryKey=a;
 			}
+			attributes.add(a);
 			return a;
 		}
 	}
 	
 	public NumericalAttribute addNumericalForeignKey(String attributeName, Table link) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
+		if(checkIfAttributeNameAlreadyExists(attributeName)) {
 			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
 		}
 		ForeignKeyNumericalAttribute a = new ForeignKeyNumericalAttribute(attributeName, this, link);
@@ -75,7 +87,7 @@ public class Table {
 	}
 
 	public CategoricalAttribute addCategoricalForeignKey(String attributeName, Table link) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
+		if(checkIfAttributeNameAlreadyExists(attributeName)) {
 			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
 		}
 		ForeignKeyCategoricalAttribute a = new ForeignKeyCategoricalAttribute(attributeName, this, link);
@@ -84,7 +96,7 @@ public class Table {
 	}
 
 	public DateAttribute addDateForignKey(String attributeName, Table link) throws NameAlreadyBoundException {
-		if(checkIfAttributeNameAlreadyExists(attributeName)==true) {
+		if(checkIfAttributeNameAlreadyExists(attributeName)) {
 			throw new NameAlreadyBoundException("An attribute with name " + attributeName + " already exists in " + this.getTableName());
 		}
 		ForeignKeyDateAttribute a = new ForeignKeyDateAttribute(attributeName, this, link);
@@ -111,7 +123,14 @@ public class Table {
 	}
 	
 	public String toString() {
-		return name;
+		String toReturn = name;
+		toReturn+= "(PK = "+this.getPrimaryKey()+")\nAttributes:\n";
+
+		for(Attribute a: attributes) {
+			toReturn += a.toString()+"\n";
+		}
+
+		return toReturn;
 	}
 
 	public Attribute getAttribute(String name) {
@@ -139,5 +158,9 @@ public class Table {
 				return true;
 		}
 		return false;
+	}
+
+	public boolean removeAttribute(Attribute a) {
+		return attributes.remove(a);
 	}
 }

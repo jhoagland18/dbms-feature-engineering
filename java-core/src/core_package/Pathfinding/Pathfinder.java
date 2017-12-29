@@ -39,9 +39,19 @@ public class Pathfinder implements Runnable {
     }
 
     public void buildPartials() throws InterruptedException { //adds paths to list parameter up to max_length
-        Main.printVerbose(pf.getName() + " partial: " + partial.toString()+" length "+partial.getLength()); //print path at run
+        //Main.printVerbose(pf.getName() + " partial: " + partial.toString()+" length "+partial.getLength()); //print path at run
 
         if (partial.getLength() == max_length) { //if path is at max_length, add to toReturn and end recursive loop
+            synchronized (toReturn) {
+                toReturn.add(partial);
+            }
+            return;
+        }
+
+        if(partial.getLength()>1 &&
+                partial.getLastRelationship().getCardinality()==Relationship.ONE_TO_MANY &&
+                partial.getSecondToLastRelationship() == partial.getLastRelationship()) {
+            partial.removeLastRelationship();
             synchronized (toReturn) {
                 toReturn.add(partial);
             }
@@ -82,7 +92,7 @@ public class Pathfinder implements Runnable {
 
            p2.addRelationship(rel, nextLink);
 
-           Main.printVerbose(pf.getName()+" submitting "+p2.toString());
+           //Main.printVerbose(pf.getName()+" submitting "+p2.toString());
 
            try {
                controller.enqueue(new Pathfinder(this.controller, this.toReturn, "Thread "+controller.countThreads(), p2));
