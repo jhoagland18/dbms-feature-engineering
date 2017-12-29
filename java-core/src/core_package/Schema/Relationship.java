@@ -10,11 +10,13 @@ public class Relationship {
 	private Attribute attribute1;
 	private Attribute attribute2;
 
+	private int cardinality;
+
 	//store relationship types
 	public final static int ONE_TO_MANY=1;
 	public final static int ONE_TO_ONE=0;
 	
-	public Relationship (Attribute att1, Attribute att2, int cardinality) {
+	protected Relationship (Attribute att1, Attribute att2, int cardinality) {
 		attribute1=att1;
 		attribute2=att2;
 
@@ -22,6 +24,8 @@ public class Relationship {
 		Main.printVerbose("table is "+att1.getParentTable());
 		table1=att1.getParentTable();
 		table2=att2.getParentTable();
+
+		this.cardinality = cardinality;
 
 		addRelationshipsToTables();
 	}
@@ -43,6 +47,10 @@ public class Relationship {
 	}
 	
 	public String toString() {
-		return table1.toString() + "     " +table2.toString();
+		return table1.getTableName() + "     " +table2.getTableName();
+	}
+
+	public int getCardinality() {
+		return cardinality;
 	}
 }

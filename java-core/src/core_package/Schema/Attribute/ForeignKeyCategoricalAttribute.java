@@ -11,6 +11,11 @@ public class ForeignKeyCategoricalAttribute extends CategoricalAttribute {
         this.link = link;
     }
 
+    public ForeignKeyCategoricalAttribute(CategoricalAttribute ca, Table link) {
+        super(ca.getAttributeName(),false,ca.getParentTable(),ca.getTypes());
+        this.link = link;
+    }
+
     public Table getLink() {
         return link;
     }

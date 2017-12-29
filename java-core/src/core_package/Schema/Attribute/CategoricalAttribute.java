@@ -9,13 +9,16 @@ public class CategoricalAttribute extends Attribute {
     ArrayList<String> types;
 
     public CategoricalAttribute(String attributeName, boolean isPrimaryKey, Table t) {
-    super(attributeName, isPrimaryKey, t);
-
-    types = new ArrayList<String>();
+        super(attributeName, isPrimaryKey, t);
+        types = new ArrayList<String>();
     }
 
     public CategoricalAttribute(String attributeName, Table t) {
         super(attributeName, false, t);
+    }
+
+    public CategoricalAttribute(String attributeName) {
+        super(attributeName, false, null);
     }
 
     CategoricalAttribute(String attributeName, boolean isPrimaryKey, Table t, ArrayList<String> types) {
@@ -36,4 +39,7 @@ public class CategoricalAttribute extends Attribute {
         return types.remove(s);
     }
 
+    public ArrayList<String> getTypes() {
+        return types;
+    }
 }

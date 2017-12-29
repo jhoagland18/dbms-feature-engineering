@@ -12,5 +12,8 @@ public class NumericalAttribute extends Attribute {
         super(attributeName, false, t);
     }
 
+    public NumericalAttribute(String attributeName) {
+        super(attributeName, false, null);
+    }
 
 }

@@ -11,4 +11,8 @@ public class DateAttribute extends Attribute {
     public DateAttribute(String attributeName, Table t) {
         super(attributeName, false, t);
     }
+
+    public DateAttribute(String attributeName) {
+        super(attributeName, false, null);
+    }
 }
