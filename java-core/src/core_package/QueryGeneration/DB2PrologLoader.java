@@ -1,47 +1,63 @@
 package core_package.QueryGeneration;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import com.ugos.jiprolog.engine.JIPEngine;
-import com.ugos.jiprolog.engine.JIPQuery;
-import com.ugos.jiprolog.engine.JIPTerm;
-import com.ugos.jiprolog.engine.JIPTermParser;
-
 import core_package.Schema.*;
 
 public class DB2PrologLoader {
-	public static JIPEngine LoadDB(String functionsFileName, ArrayList<Table> tables, 
-			ArrayList<Relationship> relationships) {
-		JIPEngine e = new JIPEngine();
-		e.consultFile(functionsFileName);
-		// scan DB
+	public static void LoadDB(String functionsFileName, ArrayList<Table> tables, 
+			ArrayList<Relationship> relationships) throws IOException {
 		
-		JIPTermParser tp = e.getTermParser();
+		// copy functions into theory.pl
+		Files.copy(new File(functionsFileName).toPath(), new File("..\\prolog\\theory.pl").toPath(),
+				StandardCopyOption.REPLACE_EXISTING);
+		
+		// scan DB and append the theory on ..\prolog\theory.pl
+		FileWriter fw = new FileWriter("..\\prolog\\theory.pl", true);
+	    BufferedWriter bw = new BufferedWriter(fw);
+	    PrintWriter writer = new PrintWriter(bw);
+	
 		for (Table t : tables) {
 			// PK
 			String pks = makePrologList(t.getPrimaryKey(), true);
-			e.asserta(tp.parseTerm("pk('"+t.getName()+"',"+pks+")."));
+			String clause = "pk('"+t.getName()+"',"+pks+").";
+			writer.println(clause);
 			
 			// scan all non-ID attributes of table t
 			for (Attribute a : t.getAttributes()) {
-				if (a.getClass() != IDAttribute.class)
-					e.asserta(tp.parseTerm("attribute('"+t.getName()+"', '"+
-					a.getAttributeName() +"', '" + typeOfAtt(a) + "', '" + a.getDimension() + "')."));
+				if (a.getClass() != IDAttribute.class) {
+					clause = "attribute('"+t.getName()+"', '"+
+							a.getAttributeName() +"', '" + typeOfAtt(a) + "', '" + a.getDimension() + "').";
+					writer.println(clause);
+				}
 				// declare bins for numeric attributes
 				if (a.getClass() == NumericAttribute.class) {
 					NumericAttribute na = (NumericAttribute)a;
 					String bins = makePrologList(na.getBinThresholds(), false);
-					e.asserta(tp.parseTerm("bin_thresholds('"+t.getName()+
-							"','"+na.getAttributeName()+"',"+bins+")."));
+					clause = "bin_thresholds('"+t.getName()+
+							"','"+na.getAttributeName()+"',"+bins+").";
+					writer.println(clause);
 				}
 				// declare important values for nominal attributes
 				if (a.getClass() == NominalAttribute.class) {
 					NominalAttribute na = (NominalAttribute)a;
 					String impvals = makePrologList(na.getImportantValues(),true);
-					e.asserta(tp.parseTerm("important_values('"+t.getName()+
-							"','"+na.getAttributeName()+"',"+impvals+")."));
+					clause = "important_values('"+t.getName()+
+							"','"+na.getAttributeName()+"',"+impvals+").";
+					writer.println(clause);
 				}
 
 			}
@@ -51,11 +67,17 @@ public class DB2PrologLoader {
 		for (Relationship r : relationships) {
 			String fk1 = makePrologList(r.getAttributes1(), true);
 			String fk2 = makePrologList(r.getAttributes2(), true);
-			e.asserta(tp.parseTerm("relationship('"+r.getTable1().getName()+"','"
-					+ r.getTable2().getName() +"',"+fk1+","+fk2+","+r.toString()+")."));
+			String clause = "relationship('"+r.getTable1().getName()+"','"
+					+ r.getTable2().getName() +"',"+fk1+","+fk2+","+r.toString()+").";
+			writer.println(clause);		
 		}
+		writer.close();
+		bw.close();
+		fw.close();
 		
-		return e;
+		String t1 = "consult('../prolog/theory.pl')";
+		System.out.println(t1 + " " + (org.jpl7.Query.hasSolution(t1) ? "succeeded" : "failed"));
+
 	}
 
 	private static String makePrologList(ArrayList<?> values, boolean quotes) {

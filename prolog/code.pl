@@ -42,6 +42,21 @@ my_atom_concat(A,[H|T],Out) :-
 	atom_concat(A,H,S1),
 	my_atom_concat(S1,T,Out).
 	
+%% TIME_STAMP MANAGEMENT
+time_stamp_in_both_tables(T,U):-
+	attribute(T,_,timestamp,_),
+	attribute(U,_,timestamp,_).
+
+% if T0 of type T and T1 of type U have both timestamps, Out=AND T.Timestamp < U.Timestamp
+time_stamp_condition(T,U,T0,T1,Out) :-
+	attribute(T,A,timestamp,_),
+	attribute(U,B,timestamp,_),
+	my_atom_concat(['AND ',T0,'.',A,' < ',T1,'.',B],Out).
+
+time_stamp_condition(T,U,_,_,Out) :-
+	\+time_stamp_in_both_tables(T,U),
+	Out=''.
+
 %%% PK MANAGEMENT %%%%
 % out will be t.PK0, t.PK1, ...
 sql_unpackPK(Table,T,Out) :-
