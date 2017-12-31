@@ -1,7 +1,7 @@
 package core_package.SchemaMapper;
 import core_package.Main;
 import core_package.Schema.Attribute;
-import core_package.Schema.Schema;
+import core_package.Schema;
 import core_package.Schema.Relationship;
 import core_package.Schema.Table;
 import org.w3c.dom.Attr;
