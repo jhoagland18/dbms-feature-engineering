@@ -16,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+import core_package.SchemaMapper.DatabaseConnection;
+import core_package.SchemaMapper.SchemaBuilder;
 import org.jpl7.*;
 
 //Created by Jackson Hoagland, Gayatri Krishnan, and Michele Samorani, during academic research with Santa Clara University on 9/29/2017
@@ -25,17 +27,16 @@ public class Main {
 	static ArrayList<Relationship> relationships = new ArrayList<>();
 	
 	public static void main (String [] args) throws Exception {
+
+        Schema sc = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER).buildSchema().getSchema();
 		loadTables();
 		JPL.init();
 		
 		DB2PrologLoader.LoadDB(
-				"..\\prolog\\functions.pl",
+				"prolog/functions.pl",
 				tables, relationships);
-		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("Purchases", 
-		"..\\prolog\\query templates");
-		
-//		ArrayList<Query> queries= QueryBuilder.buildQueries("Purchases", 
-//		"..\\prolog\\query templates\\to1toN.txt");
+		ArrayList<Query> queries= QueryBuilder.buildQueries("Purchases", 
+		"prolog/query templates/to1toN.txt");
 		System.out.println("RESULT:");
 		for (Query q : queries)
 			System.out.println(q.getSQL());

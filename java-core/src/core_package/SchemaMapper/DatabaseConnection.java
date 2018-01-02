@@ -9,13 +9,23 @@ import java.util.ArrayList;
 
 public abstract class DatabaseConnection {
 
+    //Database name
     public static String MICROSOFT_SQL_SERVER="MICROSOFT_SQL_SERVER";
     public static String ORACLE="ORACLE";
     public static String MYSQL="MYSQL";
 
+    //database data types
+    protected static String DATA_TYPE_INT = "int";
+    protected static String DATA_TYPE_DOUBLE = "double";
+    protected static String DATA_TYPE_VARCHAR = "varchar";
+    protected static String DATA_TYPE_DATETIME = "datetime";
+
+    //attribute type
     public static String ATTRIBUTE_TYPE_CATEGORICAL="ATTRIBUTE_TYPE_CATEGORICAL";
     public static String ATTRIBUTE_TYPE_NUMERICAL="ATTRIBUTE_TYPE_NUMERICAL";
     public static String ATTRIBUTE_TYPE_DATE="ATTRIBUTE_TYPE_DATE";
+
+
 
     protected Connection con;
 
@@ -27,19 +37,11 @@ public abstract class DatabaseConnection {
             return null;
     }
 
-    public abstract ArrayList<Table> getTables() throws Exception;
-
     public abstract String buildSQLToRetrieveTables();
-
-    public abstract String getPrimaryKeyNameForTable(Table t) throws Exception;
 
     public abstract String buildSQLToRetrievePrimaryKeyFromTable(String tableName);
 
-    public abstract String getAttributeType(String attributeName, String tableName) throws Exception;
-
     public abstract String buildSQLToGetAttributeType(String attributeName, String tableName);
-
-    public abstract ArrayList<Attribute> getTableAttributes(String tableName) throws Exception;
 
     public abstract String buildSQLToGetTableAttributes(String tableName);
 

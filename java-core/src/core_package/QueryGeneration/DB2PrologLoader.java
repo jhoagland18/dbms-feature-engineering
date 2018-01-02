@@ -22,11 +22,11 @@ public class DB2PrologLoader {
 			ArrayList<Relationship> relationships) throws IOException {
 		
 		// copy functions into theory.pl
-		Files.copy(new File(functionsFileName).toPath(), new File("..\\prolog\\theory.pl").toPath(),
+		Files.copy(new File(functionsFileName).toPath(), new File("prolog/theory.pl").toPath(),
 				StandardCopyOption.REPLACE_EXISTING);
 		
 		// scan DB and append the theory on ..\prolog\theory.pl
-		FileWriter fw = new FileWriter("..\\prolog\\theory.pl", true);
+		FileWriter fw = new FileWriter("prolog/theory.pl", true);
 	    BufferedWriter bw = new BufferedWriter(fw);
 	    PrintWriter writer = new PrintWriter(bw);
 	
@@ -75,7 +75,7 @@ public class DB2PrologLoader {
 		bw.close();
 		fw.close();
 		
-		String t1 = "consult('../prolog/theory.pl')";
+		String t1 = "consult('prolog/theory.pl')";
 		System.out.println(t1 + " " + (org.jpl7.Query.hasSolution(t1) ? "succeeded" : "failed"));
 
 	}

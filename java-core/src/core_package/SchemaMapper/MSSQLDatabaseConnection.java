@@ -47,38 +47,9 @@ public class MSSQLDatabaseConnection extends DatabaseConnection {
         }
     }
 
-    public ArrayList<Table> getTables() throws SQLException { //Returns a list of tables that is added to DBSchema in SchemaBuilder
-        ArrayList<Table> detectedTables = new ArrayList<Table>();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sqlGetTables);
-
-        while (rs.next()) {
-            detectedTables.add(new Table(rs.getString(1)));
-        }
-
-        return detectedTables;
-    }
-
     @Override
     public String buildSQLToRetrieveTables() {
         return sqlGetTables;
-    }
-
-    @Override
-    public String getPrimaryKeyNameForTable(Table t)  {
-        String attName="";
-        try {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sqlGetPrimaryKeyForTable1 + t.getName() + sqlGetPrimaryKeyForTable2);
-            if(rs.next()) {
-                attName = rs.getString(1);
-            }
-        } catch(Exception e) {
-            System.out.println("sql: "+sqlGetPrimaryKeyForTable1 + t.getName() + sqlGetPrimaryKeyForTable2);
-            e.printStackTrace();
-        }
-
-        return attName;
     }
 
     @Override
@@ -86,55 +57,10 @@ public class MSSQLDatabaseConnection extends DatabaseConnection {
         return sqlGetPrimaryKeyForTable1 + tableName + sqlGetPrimaryKeyForTable2;
     }
 
-    @Override
-    public String getAttributeType(String attributeName, String tableName) throws Exception {
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery(sqlGetAttributeDataType1 + tableName + sqlGetAttributeDataType2 + attributeName + sqlGetAttributeDataType3);
-
-        String attType = "";
-        if(rs.next()) {
-           attType = rs.getString(1);
-
-        } else {
-            throw new Exception("No datatype returned");
-        }
-        if(attType.equals(DATA_TYPE_INT) || attType.equals(DATA_TYPE_DOUBLE))
-        {
-            return DatabaseConnection.ATTRIBUTE_TYPE_NUMERICAL;
-        } else if(attType.equals(DATA_TYPE_VARCHAR)) {
-            return DatabaseConnection.ATTRIBUTE_TYPE_CATEGORICAL;
-        } else if(attType.equals(DATA_TYPE_DATETIME)) {
-            return DatabaseConnection.ATTRIBUTE_TYPE_DATE;
-        } else {
-            throw new Exception("No such datatype");
-        }
-    }
 
     @Override
     public String buildSQLToGetAttributeType(String attributeName, String tableName) {
         return sqlGetAttributeDataType1 + tableName + sqlGetAttributeDataType2 + attributeName + sqlGetAttributeDataType3;
-    }
-
-    @Override
-    public ArrayList<Attribute> getTableAttributes(String tableName) throws Exception {
-        Statement stmt = con.createStatement();
-        ResultSet rs=null;
-        rs = stmt.executeQuery(sqlGetTableColumns1+tableName+sqlGetTableColumns2);
-
-        String attName="";
-        String attType="";
-        ArrayList<Attribute> newAttributes = new ArrayList<Attribute>();
-
-        int i=0;
-
-        while(rs.next()) {
-            attName = rs.getString(1);
-            attType = getAttributeType(attName, tableName);
-
-            //determine attribute type and add to newAttributes
-        }
-
-        return newAttributes;
     }
 
     @Override
