@@ -1,4 +1,5 @@
 package core_package;
+import core_package.Exception.NoSuchDatabaseTypeException;
 import core_package.QueryGeneration.DB2PrologLoader;
 import core_package.QueryGeneration.Query;
 import core_package.QueryGeneration.QueryBuilder;
@@ -28,7 +29,12 @@ public class Main {
 	
 	public static void main (String [] args) throws Exception {
 
-        Schema sc = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER).buildSchema().getSchema();
+	    try {
+            Schema sc = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER).buildSchema().getSchema();
+        } catch (NoSuchDatabaseTypeException e) {
+	        e.printStackTrace();
+        }
+
 		loadTables();
 		JPL.init();
 		

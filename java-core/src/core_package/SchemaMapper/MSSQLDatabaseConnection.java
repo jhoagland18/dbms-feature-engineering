@@ -47,6 +47,9 @@ public class MSSQLDatabaseConnection extends DatabaseConnection {
         }
     }
 
+    /**
+     * @return
+     */
     @Override
     public String buildSQLToRetrieveTables() {
         return sqlGetTables;
@@ -59,7 +62,7 @@ public class MSSQLDatabaseConnection extends DatabaseConnection {
 
 
     @Override
-    public String buildSQLToGetAttributeType(String attributeName, String tableName) {
+    public String buildSQLToGetAttributeDataType(String attributeName, String tableName) {
         return sqlGetAttributeDataType1 + tableName + sqlGetAttributeDataType2 + attributeName + sqlGetAttributeDataType3;
     }
 

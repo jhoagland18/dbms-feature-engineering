@@ -1,9 +1,9 @@
 package core_package.SchemaMapper;
 
-import core_package.Schema.Attribute;
-import core_package.Schema.Table;
+import core_package.Exception.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -29,23 +29,54 @@ public abstract class DatabaseConnection {
 
     protected Connection con;
 
-    public static DatabaseConnection getConnectionForDBType(String dbType) { //returns a connection object for the specified dbType string
+    /**
+     * returns a connection object for the specified dbType string
+     * @param dbType
+     * @return
+     */
+    public static DatabaseConnection getConnectionForDBType(String dbType) throws NoSuchDatabaseTypeException {
         if(dbType.equals(MICROSOFT_SQL_SERVER)) {
             return new MSSQLDatabaseConnection();
         }
         else
-            return null;
+            throw new NoSuchDatabaseTypeException("Database type " + dbType + " does not exist");
     }
 
+    /**
+     * returns SQL to retrieve one column containing the connected database's tables
+     * @return
+     */
     public abstract String buildSQLToRetrieveTables();
 
+    /**
+     * returns SQL to retrieve primary key from designated table
+     * @param tableName
+     * @return
+     */
     public abstract String buildSQLToRetrievePrimaryKeyFromTable(String tableName);
 
-    public abstract String buildSQLToGetAttributeType(String attributeName, String tableName);
+    /**
+     * returns SQL to retrieve attribute datatype from designated attribute
+     * @param attributeName
+     * @param tableName
+     * @return
+     */
+    public abstract String buildSQLToGetAttributeDataType(String attributeName, String tableName);
 
+    /**
+     * returns SQL to retrieve a single column of table attributes
+     * @param tableName
+     * @return
+     */
     public abstract String buildSQLToGetTableAttributes(String tableName);
 
-    public abstract ResultSet query(String sql) throws Exception;
+    /**
+     * executes given SQL string parameter and returns a ResultSet containing the repsonse's data
+     * @param sql
+     * @return
+     * @throws SQLException
+     */
+    public abstract ResultSet query(String sql) throws SQLException;
 
 
 }

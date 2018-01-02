@@ -151,7 +151,7 @@ public class SchemaBuilder {
      */
     private String getAttributeType(String attributeName, String tableName) throws Exception {
 
-        ResultSet rs = conn.query(conn.buildSQLToGetAttributeType(attributeName, tableName));
+        ResultSet rs = conn.query(conn.buildSQLToGetAttributeDataType(attributeName, tableName));
         String attType = "";
         if(rs.next()) {
             attType = rs.getString(1);
@@ -201,7 +201,7 @@ public class SchemaBuilder {
                 Attribute collidingPrimaryKey = arrayListsContain(primaryKeys, att.getAttributeName());
                 if(collidingPrimaryKey!=null) {
                     if(collidingPrimaryKey!=t.getPrimaryKey()) {
-                        String attType = conn.getAttributeType(att.getAttributeName(),t.getTableName());
+                        String attType = conn.getAttributeDataType(att.getAttributeName(),t.getTableName());
                         Attribute newForeignKey = null;
                         //detect attribute type and cardinality
                         //create relationship
