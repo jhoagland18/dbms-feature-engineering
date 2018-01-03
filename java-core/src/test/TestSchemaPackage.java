@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import core_package.Schema.*;
-import junit.framework.Assert;
 
 import java.time.Period;
 import java.util.ArrayList;

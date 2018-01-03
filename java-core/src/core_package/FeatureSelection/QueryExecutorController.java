@@ -1,6 +1,5 @@
 package core_package.FeatureSelection;
 
-import core_package.Pathfinding.Pathfinder;
 //import sun.plugin.com.ParameterListCorrelator;
 
 import java.util.ArrayList;
