@@ -3,17 +3,10 @@ import core_package.QueryGeneration.DB2PrologLoader;
 import core_package.QueryGeneration.Query;
 import core_package.QueryGeneration.QueryBuilder;
 import core_package.Schema.*;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import com.microsoft.sqlserver.jdbc.*;
 import java.time.Period;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 
 import org.jpl7.*;
