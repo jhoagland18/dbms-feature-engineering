@@ -5,13 +5,13 @@ import java.util.ArrayList;
 
 public class Schema {
 
-    static ArrayList<Table> tables = new ArrayList<>();
-    static ArrayList<Relationship> relationships = new ArrayList<>();
+    private ArrayList<Table> tables = new ArrayList<>();
+    private ArrayList<Relationship> relationships = new ArrayList<>();
 
-    public static void loadTables() throws Exception {
+    public void loadTables() throws Exception {
         Table purchases = new Table("Purchases");
         purchases.addAttribute(new IDAttribute("Purchase_ID"));
-        purchases.setPrimaryKey(new IDAttribute("Purchase_ID"));
+        purchases.setPrimaryKey(purchases.getAttributeByName("Purchase_ID"));
         purchases.addAttribute(new IDAttribute("Client_ID"));
         purchases.addAttribute(new IDAttribute("Product_ID"));
         ArrayList<Period> periods = new ArrayList<>();
@@ -24,7 +24,7 @@ public class Schema {
 
         Table clients = new Table("Clients");
         clients.addAttribute(new IDAttribute("Client_ID"));
-        clients.setPrimaryKey(new IDAttribute("Client_ID"));
+        clients.setPrimaryKey(clients.getAttributeByName("Client_ID"));
         ArrayList<Double> binsAge = new ArrayList<>();
         binsAge.add(0.0); binsAge.add(20.0); binsAge.add(30.0); binsAge.add(40.0); binsAge.add(50.0);
         binsAge.add(60.0); binsAge.add(100000.0);
@@ -34,7 +34,7 @@ public class Schema {
 
         Table products = new Table("Products");
         products.addAttribute(new IDAttribute("Product_ID"));
-        products.setPrimaryKey(new IDAttribute("Product_ID"));
+        products.setPrimaryKey(products.getAttributeByName("Product_ID"));
         ArrayList<Double> binsPrice = new ArrayList<>();
         binsPrice.add(0.0); binsPrice.add(20.0); binsPrice.add(100.0); binsPrice.add(200.0);binsPrice.add(1000.0); binsPrice.add(1000000.0);
         products.addAttribute(new NumericAttribute("price", "dollars", binsPrice));
@@ -74,5 +74,25 @@ public class Schema {
 
     public ArrayList<Relationship> getRelationships() {
         return relationships;
+    }
+
+    public String toString() {
+        String toReturn = "Schema:";
+        for(Table t: tables) {
+            toReturn+=t.getName()+":\nAttributes:\n"+t.getPrimaryKey().get(0).getAttributeName()+" ("+t.getPrimaryKey().get(0).getClass().getSimpleName()+") (PK)\n";
+            for(Attribute a: t.getAttributes()) {
+                toReturn+=a.getAttributeName()+" ("+a.getClass().getSimpleName()+")\n";
+            }
+            toReturn+="\n";
+        }
+        toReturn+="Relationships:\n";
+        for(Relationship rel: relationships) {
+            toReturn+=rel.getTable1().getName() + "("+rel.getAttributes1().get(0).getAttributeName()+") -> " + rel.getTable2().getName() + "(" + rel.getAttributes2().get(0).getAttributeName() + ") "+rel.getRelationshipType()+"\n";
+        }
+        return toReturn;
+    }
+
+    public void addRelationship(Relationship rel) {
+        relationships.add(rel);
     }
 }

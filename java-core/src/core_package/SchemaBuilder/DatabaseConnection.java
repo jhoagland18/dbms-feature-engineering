@@ -1,11 +1,12 @@
-package core_package.SchemaMapper;
+package core_package.SchemaBuilder;
 
 import core_package.Exception.*;
+import core_package.Schema.Table;
+import core_package.SchemaBuilder.Connection.MSSQLDatabaseConnection;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 
 public abstract class DatabaseConnection {
 
@@ -14,11 +15,7 @@ public abstract class DatabaseConnection {
     public static String ORACLE="ORACLE";
     public static String MYSQL="MYSQL";
 
-    //database data types
-    protected static String DATA_TYPE_INT = "int";
-    protected static String DATA_TYPE_DOUBLE = "double";
-    protected static String DATA_TYPE_VARCHAR = "varchar";
-    protected static String DATA_TYPE_DATETIME = "datetime";
+
 
     //attribute type
     public static String ATTRIBUTE_TYPE_CATEGORICAL="ATTRIBUTE_TYPE_CATEGORICAL";
@@ -71,12 +68,26 @@ public abstract class DatabaseConnection {
     public abstract String buildSQLToGetTableAttributes(String tableName);
 
     /**
+     * returns two column resultset containing table attribtue names, and corresponding table attributes
+     * @param tableName
+     * @return
+     */
+    public abstract String buildSQLToGetTableAttributeNameAndDatatype(String tableName);
+
+
+    public abstract String buildSQLToGetDifferenceBetweenTotalAndNumUnique(String attName, Table t);
+
+    public abstract String buildSQLToGetNumUniqueRows(String attName, Table t);
+
+    public abstract String buildSQLToGetUniqueRows(String attName, Table t);
+
+    /**
      * executes given SQL string parameter and returns a ResultSet containing the repsonse's data
      * @param sql
      * @return
      * @throws SQLException
      */
-    public abstract ResultSet query(String sql) throws SQLException;
+    public abstract ResultSet query(String sql) throws SQLException, Exception;
 
 
 }
