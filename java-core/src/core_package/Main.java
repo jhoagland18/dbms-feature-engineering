@@ -36,8 +36,8 @@ public class Main {
 		DB2PrologLoader.LoadDB(
 				"prolog/functions.pl",
 				sc.getTables(), sc.getRelationships());
-		ArrayList<Query> queries= QueryBuilder.buildQueries("Purchases", 
-		"prolog/query templates/to1toN.txt");
+		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("Purchases",
+		"prolog/query templates");
 		System.out.println("RESULT:");
 		for (Query q : queries)
 			System.out.println(q.getSQL());
