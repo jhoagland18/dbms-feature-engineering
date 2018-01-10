@@ -11,6 +11,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -25,11 +29,12 @@ public class DB2PrologLoader {
 		Files.copy(new File(functionsFileName).toPath(), new File("prolog/theory.pl").toPath(),
 				StandardCopyOption.REPLACE_EXISTING);
 		
-		// scan DB and append the theory on ..\prolog\theory.pl
+		// scan DB and append the theory on prolog\theory.pl
 		FileWriter fw = new FileWriter("prolog/theory.pl", true);
 	    BufferedWriter bw = new BufferedWriter(fw);
 	    PrintWriter writer = new PrintWriter(bw);
 	
+	    boolean declaredTimestampPeriods = false;
 		for (Table t : tables) {
 			// PK
 			String pks = makePrologList(t.getPrimaryKey(), true);
@@ -60,6 +65,14 @@ public class DB2PrologLoader {
 					writer.println(clause);
 				}
 
+				// declare important values for timestamp attributes
+//				if (a.getClass() == TimeStampAttribute.class && !declaredTimestampPeriods) {
+//					TimeStampAttribute na = (TimeStampAttribute)a;
+//					String impvals = makePrologListOfPeriods(na.getBinThresholds());
+//					clause = "timestamp_periods("+impvals+").";
+//					writer.println(clause);
+//					declaredTimestampPeriods = true;
+//				}
 			}
 		}
 		
@@ -80,6 +93,46 @@ public class DB2PrologLoader {
 
 	}
 
+	/**
+	 * Makes a prolog list of periods. It returns also the period length in SQL format: e.g. [1,2,3],'mm'.
+	 * 
+	 * @param values
+	 * @return
+	 */
+	private static String makePrologListOfPeriods(ArrayList<Duration> values) {
+		// find the smallest period
+		Duration [] toTestAgainst = new Duration[] {Duration.ofMillis(1), 
+				Duration.ofSeconds(1), 
+				Duration.ofMinutes(1), 
+				Duration.ofHours(1), 
+				Duration.ofDays(1), 
+				Duration.of(1,ChronoUnit.WEEKS), 
+				Duration.of(1,ChronoUnit.MONTHS), 
+				Duration.of(1,ChronoUnit.YEARS)};
+
+		// find the largest unit of time that is smaller than all of the interesting durations
+		Duration chosen = Duration.ofNanos(1);
+		boolean mustExit = false;
+		for (Duration p : toTestAgainst) {
+			for (Duration v : values)
+				if (mustExit)
+					break;
+				else if (p.compareTo(v) > 0) {
+					mustExit = true;
+				}
+			chosen = p;
+		}
+		
+		// TODO finish
+		return "";
+	}
+
+	/**
+	 * Makes a prolog list [a,b,c,...].
+	 * @param values
+	 * @param quotes If true, elements will be printed within single quotes
+	 * @return
+	 */
 	private static String makePrologList(ArrayList<?> values, boolean quotes) {
 		String q = quotes? "'" : "";
 		String ret = "[";

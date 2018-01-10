@@ -22,13 +22,19 @@ public class QueryBuilder {
 	 * @throws IOException
 	 */
 	public static ArrayList<Query> buildQueriesFromDirectory(String targetTableName, String templateDirectory) throws IOException {
+		long startTime = System.nanoTime();    
+		// ... the code being measured ...    
+		int number = 0;
 		ArrayList<Query> result = new ArrayList<>();
 		File dir = new File(templateDirectory);
 		File[] directoryListing = dir.listFiles();
 		if (directoryListing != null) {
 			for (File child : directoryListing) {
-				for (Query q : buildQueries(targetTableName, child.getAbsolutePath())) 
+				for (Query q : buildQueries(targetTableName, child.getAbsolutePath())) { 
 					result.add(q);
+					long estimatedTime = System.nanoTime() - startTime;
+					System.out.println("Generated " + (++number) + " queries in " + estimatedTime / 10000000.0 + " ms");
+				}
 			}
 		}
 		result.sort(new QueryComparator());
@@ -54,8 +60,9 @@ public class QueryBuilder {
 		while ((curLine = br.readLine()) != null) {
 				code += curLine + "\n";
 		}
-		System.out.println("The code is " + (org.jpl7.Query.hasSolution(code) ? "provable" : "not provable"));
-		System.out.println("Code: " + code);
+		Boolean provable = org.jpl7.Query.hasSolution(code);
+//		System.out.println("The code is " + (provable ? "provable" : "not provable"));
+//		System.out.println("Code: " + code);
 		Map<String, Term>[] ss4 = org.jpl7.Query.allSolutions(code);
 		
 		for (int i=0;i<ss4.length;i++) {

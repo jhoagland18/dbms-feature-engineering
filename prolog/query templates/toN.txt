@@ -1,13 +1,23 @@
+% T0-toN-T1: aggregates a numeric or zero_one attribute in T1
 Complexity=1,
 relationship(T0,T1,FK0,FK1,toN),
 attribute(T1,A,TypeOfA,B),
 in(TypeOfA,[zero_one,numeric]),
 in(Agg,['MIN','MAX','AVG','SUM']),
-my_atom_concat(['The ',Agg,' ', A,' of the ',T1,' of ',T0],Description),
+atomic_list_concat(['The ',Agg,' ', A,' of the ',T1,' of ',T0],Description),
 sql_unpackPK(T0,'t0',OutPK),
 sql_ON('t0','t1',FK0,FK1,'',OutFK),
-my_atom_concat([' \
+time_stamp_condition(T0,T1,'t0','t1',Timestamp1),
+
+% where condition of an attribute C != A in T1
+attribute(T1,C,TypeOfC,DimC),
+not(C=A),
+in(TypeOfC,[zero_one,numeric,nominal]),
+where_cond(T1,'t1',C,OutWhereCondition),
+atomic_list_concat([' \
 SELECT ', OutPK, ', ', Agg,'(t1.',A,  ')', ' \
-FROM ',T0,' t0\n',' \
-LEFT OUTER JOIN ',T1,' t1\n','ON ',OutFK,' \
-GROUP BY ',OutPK], Query).
+\nFROM ',T0,' t0',' \
+\nLEFT OUTER JOIN ',T1,' t1\n','ON ',OutFK,' \
+',Timestamp1,' \
+\n',OutWhereCondition,' \
+\nGROUP BY ',OutPK], Query).
