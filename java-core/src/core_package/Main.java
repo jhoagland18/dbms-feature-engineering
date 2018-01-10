@@ -1,5 +1,7 @@
 package core_package;
 import core_package.Exception.NoSuchDatabaseTypeException;
+import core_package.FeatureSelection.QueryExecutor;
+import core_package.FeatureSelection.QueryExecutorController;
 import core_package.QueryGeneration.DB2PrologLoader;
 import core_package.QueryGeneration.Query;
 import core_package.QueryGeneration.QueryBuilder;
@@ -48,6 +50,12 @@ public class Main {
 		System.out.println("RESULT:");
 		for (Query q : queries)
 			System.out.println(q.getSQL());
+
+		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Return", DatabaseConnection.MICROSOFT_SQL_SERVER);
+		for(Query q: queries) {
+            qec.addQuery(q.getSQL());
+        }
+        qec.shutdownExecutor();
 		
 		return;
 	}
