@@ -68,7 +68,7 @@ public class QueryExecutorController {
 
     public DatabaseConnection checkoutConnection() {
         synchronized (connections) {
-            System.out.println("Checking out connection. Remaining: "+connections.size());
+//            System.out.println("Checking out connection. Remaining: "+connections.size());
             if(connections.size()!=0) {
                 return connections.remove(0);
             } else {
@@ -84,7 +84,7 @@ public class QueryExecutorController {
 
     public void returnConnection(DatabaseConnection conn) {
         synchronized (connections) {
-            System.out.println("Returning connection "+connections.size());
+//            System.out.println("Returning connection "+connections.size());
             connections.add(conn);
         }
     }

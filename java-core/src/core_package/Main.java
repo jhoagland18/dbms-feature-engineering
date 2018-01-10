@@ -51,7 +51,7 @@ public class Main {
 		for (Query q : queries)
 			System.out.println(q.getSQL());
 
-		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Return", DatabaseConnection.MICROSOFT_SQL_SERVER);
+		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Returned", DatabaseConnection.MICROSOFT_SQL_SERVER);
 		for(Query q: queries) {
             qec.addQuery(q.getSQL());
         }
@@ -71,7 +71,7 @@ public class Main {
 		periods.add(Period.ofMonths(2));
 		periods.add(Period.ofMonths(12));
 		purchases.addAttribute(new TimeStampAttribute("date", periods));
-		purchases.addAttribute(new ZeroOneAttribute("return"));
+		purchases.addAttribute(new ZeroOneAttribute("returned"));
 		purchases.addAttribute(new ZeroOneAttribute("online"));
 
 		Table clients = new Table("Clients");

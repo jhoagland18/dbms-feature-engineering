@@ -71,7 +71,7 @@ where_cond(Table,TableVarName,Att,Out) :-
 
 pk('Purchases',['Purchase_ID']).
 attribute('Purchases', 'date', 'timestamp', 'timestamp').
-attribute('Purchases', 'return', 'zero_one', 'zero-one').
+attribute('Purchases', 'returned', 'zero_one', 'zero-one').
 attribute('Purchases', 'online', 'zero_one', 'zero-one').
 pk('Clients',['Client_ID']).
 attribute('Clients', 'age', 'numeric', 'years').
