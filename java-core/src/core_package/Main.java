@@ -23,17 +23,18 @@ public class Main {
 	
 	public static void main (String [] args) throws Exception {
 	
-	    try {
-            SchemaBuilder sb = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER);
-					System.out.println(sb.buildSchema().getSchema().toString());
-
-        Schema sc = new Schema();
-	    sc.loadTables();
-	    tables = sc.getTables();
-	    relationships = sc.getRelationships();
-        } catch (Exception e) {
-    		loadTables();
-        }
+//	    try {
+//            SchemaBuilder sb = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER);
+//					System.out.println(sb.buildSchema().getSchema().toString());
+//
+//        Schema sc = new Schema();
+//	    sc.loadTables();
+//	    tables = sc.getTables();
+//	    relationships = sc.getRelationships();
+//        } catch (Exception e) {
+//    		loadTables();
+//        }
+		loadTables();
 	    
 	    System.out.println("********************");
 	    System.out.println("ATTRIBUTE GENERATION");
