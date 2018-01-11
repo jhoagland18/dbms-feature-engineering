@@ -50,23 +50,26 @@ sql_ON(T1,T2,[FK1|R1],[FK2|R2],CurString,Out) :-
 
 %%% WHERE TO-VALUE CONDITIONS %%%
 %0-1 variable. Out will be "WHERE tableVarName.Att = 0/1"
-where_cond(Table,TableVarName,Att,Out) :-
+where_cond(Table,TableVarName,Att,And,Out) :-
 	attribute(Table,Att,zero_one,_),
 	member(N,[0,1]),
-	atomic_list_concat(['WHERE ',TableVarName,'.',Att,' = ',N],Out).
+	((And=1,FirstWord='AND ');(And=0,FirstWord='WHERE ')),
+	atomic_list_concat([FirstWord,TableVarName,'.',Att,' = ',N],Out).
 
 %nominal variable
-where_cond(Table,TableVarName,Att,Out) :-
+where_cond(Table,TableVarName,Att,And,Out) :-
 	attribute(Table,Att,nominal,_),
 	important_values(Table,Att,ImportantValues),
 	member(N,ImportantValues),
-	atomic_list_concat(['WHERE ',TableVarName,'.',Att,' = ',N],Out).
+	((And=1,FirstWord='AND ');(And=0,FirstWord='WHERE ')),
+	atomic_list_concat([FirstWord,TableVarName,'.',Att,' = ','\'',N,'\''],Out).
 
 %numeric variable: WHERE tableVarName.Att > X AND tableVarName.Att < Y for each binthresholds X,Y 
-where_cond(Table,TableVarName,Att,Out) :-
+where_cond(Table,TableVarName,Att,And,Out) :-
 	attribute(Table,Att,numeric,_),
 	bin_boundaries(X,Y,Table,Att),
-	atomic_list_concat(['WHERE ',TableVarName,'.',Att,' > ',X,' AND ',TableVarName,'.',Att,' < ',Y],Out).
+	((And=1,FirstWord='AND ');(And=0,FirstWord='WHERE ')),
+	atomic_list_concat([FirstWord,TableVarName,'.',Att,' > ',X,' AND ',TableVarName,'.',Att,' < ',Y],Out).
 
 
 pk('Purchases',['Purchase_ID']).
