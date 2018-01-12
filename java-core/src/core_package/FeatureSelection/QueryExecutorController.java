@@ -3,6 +3,7 @@ package core_package.FeatureSelection;
 //import sun.plugin.com.ParameterListCorrelator;
 
 import core_package.Exception.NoSuchDatabaseTypeException;
+import core_package.QueryGeneration.Query;
 import core_package.Schema.Attribute;
 import core_package.Schema.Table;
 import core_package.SchemaBuilder.DatabaseConnection;
@@ -20,14 +21,17 @@ public class QueryExecutorController {
     private ExecutorService executor;
 
     private ArrayList<Future> futures = new ArrayList<java.util.concurrent.Future>();
-    private ArrayList<QueryExecutor> queries = new ArrayList<QueryExecutor>();
+    private ArrayList<QueryExecutor> executors = new ArrayList<QueryExecutor>();
+
+    private ArrayList<Query> queries = new ArrayList<Query>();
 
     private ArrayList<DatabaseConnection> connections = new ArrayList<DatabaseConnection>();
 
     private HashMap<String,Double> target = new HashMap();
     private String dbConnectionType;
 
-    public QueryExecutorController(int numThreads, String targetTablePK, String targetColName, String dbConnectionType) {
+    public QueryExecutorController(int numThreads, String targetTablePK, String targetColName, String dbConnectionType, ArrayList<Query> queries) {
+        this.queries = queries;
         this.dbConnectionType = dbConnectionType;
         try {
             DatabaseConnection conn = DatabaseConnection.getConnectionForDBType(dbConnectionType);
@@ -40,25 +44,17 @@ public class QueryExecutorController {
 
             for(int i=0; i<numThreads; i++) {
                     connections.add(DatabaseConnection.getConnectionForDBType(dbConnectionType));
-
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         executor = Executors.newFixedThreadPool(numThreads);
-    }
+        QueryExecutor qe = new QueryExecutor(queries, target, this);
 
-    public boolean addQuery(String query) {
-        if(executor.isShutdown())
-            return false;
-
-        QueryExecutor qe = new QueryExecutor(query, target, this);
-
-        queries.add(qe);
+        executors.add(qe);
         futures.add(executor.submit(qe));
-
-        return true;
     }
 
     public void shutdownExecutor() throws InterruptedException {

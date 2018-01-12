@@ -48,14 +48,13 @@ public class Main {
 				tables, relationships);
 		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("Purchases",
 		"prolog/query templates");
+
 		System.out.println("RESULT:");
 		for (Query q : queries)
 			System.out.println(q.getSQL());
 
-		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Returned", DatabaseConnection.MICROSOFT_SQL_SERVER);
-		for(Query q: queries) {
-            qec.addQuery(q.getSQL());
-        }
+		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Returned", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
+
         qec.shutdownExecutor();
 		
 		return;
