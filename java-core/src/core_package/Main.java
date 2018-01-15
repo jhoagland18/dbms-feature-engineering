@@ -53,10 +53,10 @@ public class Main {
 		for (Query q : queries)
 			System.out.println(q.getSQL());
 
-		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Returned", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
-
-        qec.shutdownExecutor();
-		
+		long startTime = System.nanoTime();
+		QueryExecutorController qec = new QueryExecutorController(1, "Purchase_ID","Returned", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
+		long elapsedTime = System.nanoTime() - startTime;
+		System.out.println("Correlation analysis elapsed time: "+elapsedTime/1000000000.0);
 		return;
 	}
 

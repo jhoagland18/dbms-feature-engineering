@@ -20,7 +20,7 @@ time_stamp_in_both_tables(T,U):-
 time_stamp_condition(T,U,T0,T1,Out) :-
 	attribute(T,A,timestamp,_),
 	attribute(U,B,timestamp,_),
-	atomic_list_concat(['AND ',T0,'.',A,' < ',T1,'.',B],Out).
+	atomic_list_concat(['AND ',T0,'.',A,' > ',T1,'.',B],Out).
 
 time_stamp_condition(T,U,_,_,Out) :-
 	\+time_stamp_in_both_tables(T,U),

@@ -34,7 +34,8 @@ public class Query {
 	}
 
 	public void setRows(HashMap<String, Double> inputRows) {
-		rows = inputRows;
+
+		rows = new HashMap<String, Double>(inputRows);
 	}
 
 	public void setCorrelationToDependent(double corr) {

@@ -32,6 +32,7 @@ public abstract class DatabaseConnection {
      * @return
      */
     public static DatabaseConnection getConnectionForDBType(String dbType) throws NoSuchDatabaseTypeException {
+        System.out.println("Getting new database connection for "+dbType);
         if(dbType.equals(MICROSOFT_SQL_SERVER)) {
             return new MSSQLDatabaseConnection();
         }
