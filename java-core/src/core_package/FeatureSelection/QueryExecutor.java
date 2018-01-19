@@ -4,11 +4,8 @@ import core_package.Environment;
 import core_package.Exception.NoSuchDatabaseTypeException;
 import core_package.QueryGeneration.Query;
 import core_package.SchemaBuilder.DatabaseConnection;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
-import javax.swing.text.DateFormatter;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -23,7 +20,7 @@ public class QueryExecutor implements Runnable {
     private ArrayList<Query> savedQueries;
     private DatabaseConnection conn;
 
-    private HashMap<String, Double> predictorValues = new HashMap<String, Double>();
+    private HashMap<String, Double[]> predictorValues = new HashMap<String, Double[]>(); //[0] = actual, including nulls: [1] = all absent rows averaged
 
     long sqltime = 0L;
 
@@ -173,7 +170,8 @@ public class QueryExecutor implements Runnable {
                 if(!rs.wasNull()) {
                     numRows++;
                     sumRows += value;
-                    predictorValues.put(rs.getString(1), value);
+                    Double[] values = {value,value};
+                    predictorValues.put(rs.getString(1), values);
                 }
             }
 
@@ -190,13 +188,13 @@ public class QueryExecutor implements Runnable {
 //                if(numComparisons>200 && correlation<Environment.minCorrelation) { //267
 //                    return correlation;
 //                }
-
+                Double[] values = {null,avgRow};
                 if(!predictorValues.containsKey(key)) {
-                    predictorValues.put(key,avgRow);
+                    predictorValues.put(key,values);
                 }
 
                 numRowsCompared++;
-                double x = predictorValues.get(key);
+                double x = predictorValues.get(key)[1];
                 double y = target.get(key);
 
                 sx += x;
@@ -225,8 +223,8 @@ public class QueryExecutor implements Runnable {
     }
 
     public static double getCorrelationToFeature(Query q1, Query q2) {
-        HashMap<String,Double> q1Rows = q1.getRows();
-        HashMap<String,Double> q2Rows = q2.getRows();
+        HashMap<String,Double[]> q1Rows = q1.getRows();
+        HashMap<String,Double[]> q2Rows = q2.getRows();
 
         Set<String> q1keys = q1Rows.keySet();
 
@@ -247,8 +245,8 @@ public class QueryExecutor implements Runnable {
 //                    return correlation;
 //                }
 
-                double x = q1Rows.get(key);
-                double y = q2Rows.get(key);
+                double x = q1Rows.get(key)[1];
+                double y = q2Rows.get(key)[1];
 
                 sx += x;
                 sy += y;

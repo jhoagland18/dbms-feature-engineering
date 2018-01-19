@@ -9,10 +9,14 @@ import core_package.Schema.Attribute;
 import core_package.Schema.Table;
 import core_package.SchemaBuilder.DatabaseConnection;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -115,6 +119,8 @@ public class QueryExecutorController {
 
         }
 
+        sortQueriesByCorrelationToDependant(savedQueries);
+
         System.out.println("Final Queries: "+savedQueries.size());
 
         for(Query q: savedQueries) {
@@ -122,6 +128,9 @@ public class QueryExecutorController {
             System.out.println("\nCorr: "+q.getCorrelationToDependent()+"\nSQL:\n"+q.getSQL());
         }
 
+
+
+        writeFeatureValueSheet();
     }
 
     public void shutdownExecutor() throws InterruptedException {
@@ -148,6 +157,94 @@ public class QueryExecutorController {
 
     public synchronized void addNewPotentialFeatures(ArrayList<Query> qs) {
         savedQueries.addAll(qs);
+    }
+
+    private void writeFeatureValueSheet() {
+
+        ArrayList<HashMap<String,Double[]>> queryRows = new ArrayList<>(savedQueries.size());
+
+        for(Query q: savedQueries) {
+            queryRows.add(q.getRows());
+        }
+
+        PrintWriter rowWriter = null;
+        PrintWriter dictWriter = null;
+        
+        try {
+            rowWriter = new PrintWriter("Feature Value Sheet", "UTF-8");
+            dictWriter = new PrintWriter("Feature Dictionary", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        
+        StringBuilder rowLine = new StringBuilder();
+        StringBuilder dictLine = new StringBuilder();
+
+        rowLine.append("ID");
+        int attNum = 0;
+
+        for(Query q: savedQueries) {
+            String attName = "att_"+attNum;
+
+            dictLine.setLength(0);
+
+            rowLine.append(", "+attName);
+
+            dictLine.append(attName+"\n");
+            dictLine.append(q.getDescription()+"\n");
+            dictLine.append(q.getSQL()+"\n");
+            dictWriter.println(dictLine);
+
+            attNum++;
+        }
+
+        dictWriter.close();
+
+        rowLine.append(", Dep.");
+
+        rowWriter.println(rowLine.toString());
+
+        Set<String> ids = target.keySet();
+
+        for(String id: ids) {
+            rowLine.setLength(0);
+
+            rowLine.append(id);
+
+            for(HashMap<String, Double[]> row: queryRows) {
+                rowLine.append(", "+row.get(id)[0]);
+            }
+
+            rowLine.append(", "+target.get(id));
+
+            rowWriter.println(rowLine.toString());
+
+        }
+        rowWriter.close();
+    }
+
+    private void sortQueriesByCorrelationToDependant(ArrayList<Query> queries) {
+
+        int n = queries.size();
+
+        for (int i=1; i<n; ++i)
+        {
+            Query key = queries.get(i);
+            int j = i-1;
+
+        /* Move elements of arr[0..i-1], that are
+           greater than key, to one position ahead
+           of their current position */
+            while (j>=0 && queries.get(j).getCorrelationToDependent() < key.getCorrelationToDependent())
+            {
+                queries.set(j+1,queries.get(j));
+
+                j = j-1;
+            }
+            queries.set(j+1, key);
+        }
     }
 
 

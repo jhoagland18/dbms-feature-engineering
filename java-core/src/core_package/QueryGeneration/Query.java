@@ -19,7 +19,7 @@ public class Query {
 		return complexity;
 	}
 
-	private HashMap<String, Double> rows;
+	private HashMap<String, Double[]> rows;
 	private double corrToDependent;
 	
 	public Query(String SQL, Double complexity, String description) {
@@ -29,13 +29,13 @@ public class Query {
 
 	}
 
-	public HashMap<String, Double> getRows() {
+	public HashMap<String, Double[]> getRows() {
 		return rows;
 	}
 
-	public void setRows(HashMap<String, Double> inputRows) {
+	public void setRows(HashMap<String, Double[]> inputRows) {
 
-		rows = new HashMap<String, Double>(inputRows);
+		rows = new HashMap<String, Double[]>(inputRows);
 	}
 
 	public void setCorrelationToDependent(double corr) {

@@ -25,6 +25,6 @@ public class Environment {
     public static String targetTableName="Purchases";
     
     public static Double highCorrelationWarningThreshold = 0.8;
-    public static Double minCorrelation = 0.2;
+    public static Double minCorrelation = 0.05;
     public static Double maxFeatureCorrelation = 0.5;
 }
