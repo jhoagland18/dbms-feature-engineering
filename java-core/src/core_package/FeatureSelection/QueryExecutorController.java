@@ -214,7 +214,11 @@ public class QueryExecutorController {
             rowLine.append(id);
 
             for(HashMap<String, Double[]> row: queryRows) {
-                rowLine.append(", "+row.get(id)[0]);
+                if(row.get(id)[0]==null) {
+                    rowLine.append(",");
+                } else {
+                    rowLine.append(", " + row.get(id)[0]);
+                }
             }
 
             rowLine.append(", "+target.get(id));
