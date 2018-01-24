@@ -29,7 +29,7 @@ if __name__ == "__main__":
     for attName in attr:
         if df[attName].nunique() > 15:
             dfViz[attName] = pd.cut(x=df[attName],bins=5)
-        chart = sns.factorplot(x=attName,y=' Dep.',data=df,kind = 'bar', aspect=3)
+        chart = sns.factorplot(x=attName,y=' Dep.',data=dfViz,kind = 'bar', aspect=3)
         chart.savefig(os.path.join(os.path.dirname(__file__), "../../output/Report/report-source/IMG"+ str(i)  + ".png"),dpi=500)
         i+=1
 
