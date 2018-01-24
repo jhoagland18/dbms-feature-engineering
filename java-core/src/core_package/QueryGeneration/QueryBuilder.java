@@ -33,7 +33,7 @@ public class QueryBuilder {
 				for (Query q : buildQueries(targetTableName, child.getAbsolutePath())) { 
 					result.add(q);
 					long estimatedTime = System.nanoTime() - startTime;
-					System.out.println("Generated " + (++number) + " queries in " + estimatedTime / 10000000.0 + " ms");
+					//System.out.println("Generated " + (++number) + " queries in " + estimatedTime / 10000000.0 + " ms");
 				}
 			}
 		}

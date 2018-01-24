@@ -1,0 +1,65 @@
+<!DODCTYPE html>
+<html>
+	<head>
+		<title>Report</title>
+
+		<style>
+	
+			
+			#grid {
+				width:100%;
+				border-spacing:10px;
+			}
+
+			.grid_element {
+				width:50%;
+				border: 2px solid black;
+				padding:2%;
+				text-align:center;
+				vertical-align: top;
+
+			}
+			.section_header {
+				text-align:center;
+			}
+
+			#summary_text {
+				padding:2%;
+			}
+
+			img {
+				height:250px;
+			}
+			
+		</style>
+	</head>
+
+	<body>
+		<div id="main_content">
+			<div id="report_summary">
+				<h2 class="section_header">Report Summary</h2>
+				
+				<table id="grid">
+  					<tr><td class="grid_element">
+							<img src=report-source\IMG1.png></img>
+							<p>test</p>
+						</td><td class="grid_element">
+							<img src=report-source\IMG2.png></img>
+							<p>test</p>
+						</td></tr>
+  					<tr><td class="grid_element">
+							<img src=report-source\IMG3.png></img>
+							<p>test</p>
+						</td><td class="grid_element">
+							<img src=report-source\IMG4.png></img>
+							<p>test</p>
+						</td></tr>
+				</table>
+				
+			</div>
+			<div id="summary_text">
+				<p>Area under the curve obtained by AdaBoost in a 10-fold cross validation: 0.9155</p>
+			</div>
+		</div>
+	</body>
+	</html>

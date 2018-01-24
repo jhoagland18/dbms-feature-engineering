@@ -36,27 +36,48 @@ public class Main {
 //        }
 		loadTables();
 	    
-	    System.out.println("********************");
-	    System.out.println("ATTRIBUTE GENERATION");
-	    System.out.println("********************");
+//	    System.out.println("********************");
+//	    System.out.println("ATTRIBUTE GENERATION");
+//	    System.out.println("********************");
 		JPL.init();
-	       System.out.println("Working Directory = " +
+
+	   System.out.println("Working Directory = " +
 	               System.getProperty("user.dir"));
-	       
+
+	   System.out.println("Loading database...");
 		DB2PrologLoader.LoadDB(
 				"prolog/functions.pl",
 				tables, relationships);
+
+		System.out.println("Generating feature queries...");
+
 		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("Purchases",
 		"prolog/query templates");
 
-		System.out.println("RESULT:");
-		for (Query q : queries)
-			System.out.println(q.getSQL());
+//		System.out.println("RESULT:");
+//		for (Query q : queries)
+//			System.out.println(q.getSQL());
+
+		System.out.println("Executing queries and comparing correlation to dependant...");
 
 		long startTime = System.nanoTime();
 		QueryExecutorController qec = new QueryExecutorController(4, "Purchase_ID","Returned", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
 		long elapsedTime = System.nanoTime() - startTime;
-		System.out.println("Correlation analysis elapsed time: "+elapsedTime/1000000000.0);
+
+		System.out.println("Correlation analysis finished. Elapsed time: "+elapsedTime/1000000000.0);
+
+		System.out.println("Analyzing features...");
+
+		Process featureAnalyzer = Runtime.getRuntime().exec("py python-core/FeatureAnalyzer/featureAnalysis.py");
+
+		featureAnalyzer.waitFor();
+
+		System.out.println("Generating report web page...");
+
+		Process reportGenerator = Runtime.getRuntime().exec("py python-core/ReportGenerator/reportGenerator.py");
+
+		System.out.println("Done.");
+
 		return;
 	}
 

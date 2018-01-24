@@ -9,6 +9,7 @@ import core_package.Schema.Attribute;
 import core_package.Schema.Table;
 import core_package.SchemaBuilder.DatabaseConnection;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -59,7 +60,7 @@ public class QueryExecutorController {
 
         executor = Executors.newFixedThreadPool(numThreads);
 
-        System.out.println("Total number of features to compare: "+queries.size());
+        //System.out.println("Total number of features to compare: "+queries.size());
         for(int i=0; i<numThreads; i++) {
 
             int listStart = i*(queries.size()/numThreads);
@@ -72,7 +73,7 @@ public class QueryExecutorController {
             }
 
             List<Query> partition = queries.subList(listStart,listEnd);
-            System.out.println("Creating new QE: "+listStart+", "+listEnd);
+            //System.out.println("Creating new QE: "+listStart+", "+listEnd);
             QueryExecutor qe = null;
             try {
                 qe = new QueryExecutor(new ArrayList<Query>(partition), target, this);
@@ -90,11 +91,11 @@ public class QueryExecutorController {
             e.printStackTrace();
         }
 
-        System.out.println("number of saved queries to filter through: "+savedQueries.size());
+        //System.out.println("number of saved queries to filter through: "+savedQueries.size());
 
-        for(Query q: savedQueries) {
-            System.out.println(q.getSQL());
-        }
+//        for(Query q: savedQueries) {
+//            System.out.println(q.getSQL());
+//        }
 
         for (int i = 0; i < savedQueries.size(); i++) {
             Query q1 = savedQueries.get(i);
@@ -103,7 +104,7 @@ public class QueryExecutorController {
                 Query q2 = savedQueries.get(j);
 
                 double corrToFeature = QueryExecutor.getCorrelationToFeature(q1,q2);
-                System.out.println("Corr to feature is "+corrToFeature);
+//                System.out.println("Corr to feature is "+corrToFeature);
 
                 if(corrToFeature> Environment.maxFeatureCorrelation) {
                     if(q1.getCorrelationToDependent()>q2.getCorrelationToDependent()) {
@@ -121,12 +122,12 @@ public class QueryExecutorController {
 
         sortQueriesByCorrelationToDependant(savedQueries);
 
-        System.out.println("Final Queries: "+savedQueries.size());
+//        System.out.println("Final Queries: "+savedQueries.size());
 
-        for(Query q: savedQueries) {
-
-            System.out.println("\nCorr: "+q.getCorrelationToDependent()+"\nSQL:\n"+q.getSQL());
-        }
+//        for(Query q: savedQueries) {
+//
+//            System.out.println("\nCorr: "+q.getCorrelationToDependent()+"\nSQL:\n"+q.getSQL());
+//        }
 
 
 
@@ -171,8 +172,8 @@ public class QueryExecutorController {
         PrintWriter dictWriter = null;
         
         try {
-            rowWriter = new PrintWriter("Feature Value Sheet", "UTF-8");
-            dictWriter = new PrintWriter("Feature Dictionary", "UTF-8");
+            rowWriter = new PrintWriter("output/features/Feature Matrix.csv", "UTF-8");
+            dictWriter = new PrintWriter("output/features/Feature Dictionary.csv", "UTF-8");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {

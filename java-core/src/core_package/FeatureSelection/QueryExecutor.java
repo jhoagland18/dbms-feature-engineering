@@ -78,7 +78,7 @@ public class QueryExecutor implements Runnable {
             //System.out.println("Correlation is " + corr);
 
             if (absCorr > Environment.highCorrelationWarningThreshold) {
-                System.out.println("This query has a high correlation. I'll discard it: \n" + sql);
+//                System.out.println("This query has a high correlation. I'll discard it: \n" + sql);
                 continue; // run the next query
             }
 
@@ -133,15 +133,11 @@ public class QueryExecutor implements Runnable {
 
 
         }
-//        System.out.println("Saved queries: "+savedQueries.size());
-//        for(Query qs: savedQueries) {
-//            System.out.println("Corr is: "+qs.getCorrelationToDependent());
-//        }
 
-        System.out.println("\nTotal work time for all features was "+(featurecomparisontime+sqltime+dependenttime)/1000000000.0+".\n"+
-        "Calculating correlation to dependent took: "+dependenttime/1000000000.0+
-                "\nCalculating correlation between selected features took: "+featurecomparisontime/1000000000.0
-                +"\nSQL queries took: "+ sqltime/1000000000.0);
+//        System.out.println("\nTotal work time for all features was "+(featurecomparisontime+sqltime+dependenttime)/1000000000.0+".\n"+
+//        "Calculating correlation to dependent took: "+dependenttime/1000000000.0+
+//                "\nCalculating correlation between selected features took: "+featurecomparisontime/1000000000.0
+//                +"\nSQL queries took: "+ sqltime/1000000000.0);
 
         queryExecutorController.addNewPotentialFeatures(savedQueries);
 
