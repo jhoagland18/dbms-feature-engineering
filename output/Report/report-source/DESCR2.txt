@@ -1,1 +1,1 @@
-test
+The SUM online among the previous Purchases of the Clients where WHERE t2.returned = 1
