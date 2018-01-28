@@ -44,7 +44,7 @@ public class QueryExecutorController {
         try {
             DatabaseConnection conn = DatabaseConnection.getConnectionForDBType(dbConnectionType);
             ResultSet rs = conn.query("SELECT ["+targetTablePK + "], [" + targetColName +
-            "] FROM "+"Purchases");
+            "] FROM "+"ratings");
 
             Double value = 0.0;
             while(rs.next()) {
@@ -121,6 +121,8 @@ public class QueryExecutorController {
         }
 
         sortQueriesByCorrelationToDependant(savedQueries);
+
+        System.out.println(savedQueries.size() + " saved queries.");
 
 //        System.out.println("Final Queries: "+savedQueries.size());
 

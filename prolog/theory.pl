@@ -72,19 +72,24 @@ where_cond(Table,TableVarName,Att,And,Out) :-
 	atomic_list_concat([FirstWord,TableVarName,'.',Att,' > ',X,' AND ',TableVarName,'.',Att,' < ',Y],Out).
 
 
-pk('Purchases',['Purchase_ID']).
-attribute('Purchases', 'date', 'timestamp', 'timestamp').
-attribute('Purchases', 'returned', 'zero_one', 'zero-one').
-attribute('Purchases', 'online', 'zero_one', 'zero-one').
-pk('Clients',['Client_ID']).
-attribute('Clients', 'age', 'numeric', 'years').
-bin_thresholds('Clients','age',[0.0,20.0,30.0,40.0,50.0,60.0,100000.0]).
-attribute('Clients', 'gender', 'nominal', 'gender').
-important_values('Clients','gender',['M','F']).
-pk('Products',['Product_ID']).
-attribute('Products', 'price', 'numeric', 'dollars').
-bin_thresholds('Products','price',[0.0,20.0,100.0,200.0,1000.0,1000000.0]).
-relationship('Purchases','Clients',['Client_ID'],['Client_ID'],to1).
-relationship('Purchases','Products',['Product_ID'],['Product_ID'],to1).
-relationship('Clients','Purchases',['Client_ID'],['Client_ID'],toN).
-relationship('Products','Purchases',['Product_ID'],['Product_ID'],toN).
+pk('CacaoBar',['cacaobarid']).
+attribute('CacaoBar', 'Cocoa_Percent', 'numeric', 'percent').
+bin_thresholds('CacaoBar','Cocoa_Percent',[0.71,0.66,0.55,0.5,0.63,0.64,0.85,0.61,0.78,0.62,0.77,0.75,0.73,0.69,0.76,0.7,0.65,0.58,0.735,0.84,0.74,0.67,0.42,0.8,0.91,0.57,0.53,0.9,0.88,0.6,0.86,0.89,0.72,0.605,0.87,0.81,1.0,0.725,0.82,0.68,0.46,0.83,0.99,0.56,0.79]).
+attribute('CacaoBar', 'Bean_Type', 'nominal', '').
+important_values('CacaoBar','Bean_Type',['Nacional','Criollo',' Forastero','Forastero (Nacional)','Trinitario',' Forastero','Criollo (Amarru)','Trinitario',' TCGA','Criollo','Blend','Forastero (Parazinho)','Trinitario',' Criollo','Forastero(Arriba',' CCN)','CCN51','Criollo (Ocumare 61)','Criollo (Ocumare 67)','Trinitario','Criollo (Ocumare 77)','Blend-Forastero','Criollo','Criollo (Ocumare)','Criollo (Porcelana)','Criollo',' +','Forastero (Arriba) ASSS','Forastero','Matina','Amazon mix',' ','Forastero (Arriba)','Forastero (Arriba) ASS','Trinitario (85% Criollo)','','Amazon','Forastero (Catongo)','Criollo (Wild)','Forastero',' Trinitario','Criollo',' Trinitario','Beniano','Amazon',' ICS','EET','Trinitario (Scavina)','Forastero (Amelonado)','Nacional (Arriba)','Trinitario (Amelonado)','Trinitario',' Nacional']).
+attribute('CacaoBar', 'Broad Bean_Origin', 'nominal', '').
+important_values('CacaoBar','Broad Bean_Origin',['Africa, Carribean, C. Am.','Australia','Belize','Bolivia','Brazil','Burma','Cameroon','Carribean','Carribean(DR/Jam/Tri)','Central and S. America','Colombia','Colombia, Ecuador','Congo','Cost Rica, Ven','Costa Rica','Cuba','Dom. Rep., Madagascar','Domincan Republic','Dominican Rep., Bali','Dominican Republic','DR, Ecuador, Peru','Ecuador','Ecuador, Costa Rica','Ecuador, Mad., PNG','El Salvador','Fiji','Gabon','Ghana','Ghana & Madagascar','Ghana, Domin. Rep','Ghana, Panama, Ecuador','Gre., PNG, Haw., Haiti, Mad','Grenada','Guat., D.R., Peru, Mad., PNG','Guatemala','Haiti','Hawaii','Honduras','India','Indonesia','Indonesia, Ghana','Ivory Coast','Jamaica','Liberia','Mad., Java, PNG','Madagascar','Madagascar & Ecuador','Malaysia','Martinique','Mexico','Nicaragua','Nigeria','Panama','Papua New Guinea','Peru','Peru(SMartin,Pangoa,nacional)','Peru, Belize','Peru, Dom. Rep','Peru, Ecuador','Peru, Ecuador, Venezuela','Peru, Mad., Dom. Rep.','Peru, Madagascar','Philippines','PNG, Vanuatu, Mad','Principe','Puerto Rico','Samoa','Sao Tome','Sao Tome & Principe','Solomon Islands','South America','South America, Africa','Sri Lanka','St. Lucia','Suriname','Tanzania','Tobago','Togo','Trinidad','Trinidad, Ecuador','Trinidad, Tobago','Trinidad-Tobago','Uganda','Vanuatu','Ven, Bolivia, D.R.','Ven, Trinidad, Ecuador','Ven., Indonesia, Ecuad.','Ven., Trinidad, Mad.','Ven.,Ecu.,Peru,Nic.','Venez,Africa,Brasil,Peru,Mex','Venezuela','Venezuela, Carribean','Venezuela, Dom. Rep.','Venezuela, Ghana','Venezuela, Java','Venezuela, Trinidad','Venezuela/ Ghana','Vietnam','West Africa']).
+pk('Ratings',['RatingID']).
+attribute('Ratings', 'Review_Date', 'numeric', '').
+bin_thresholds('Ratings','Review_Date',[2015.0,2011.0,2008.0,2010.0,2007.0,2014.0,2017.0,2009.0,2006.0,2013.0,2012.0,2016.0]).
+attribute('Ratings', 'Rating', 'numeric', '').
+bin_thresholds('Ratings','Rating',[2.75,3.0,3.25,3.5,1.5,3.75,4.0,1.75,1.0,2.25,5.0,2.5,2.0]).
+pk('Company',['companyid']).
+attribute('Company', 'company_location', 'nominal', '').
+important_values('Company','company_location',['Amsterdam','Argentina','Australia','Austria','Belgium','Bolivia','Brazil','Canada','Chile','Colombia','Costa Rica','Czech Republic','Denmark','Domincan Republic','Ecuador','Eucador','Fiji','Finland','France','Germany','Ghana','Grenada','Guatemala','Honduras','Hungary','Iceland','India','Ireland','Israel','Italy','Japan','Lithuania','Madagascar','Martinique','Mexico','Netherlands','New Zealand','Niacragua','Nicaragua','Peru','Philippines','Poland','Portugal','Puerto Rico','Russia','Sao Tome','Scotland','Singapore','South Africa','South Korea','Spain','St. Lucia','Suriname','Sweden','Switzerland','U.K.','U.S.A.','Venezuela','Vietnam','Wales']).
+attribute('Company', 'Company', 'nominal', '').
+important_values('Company','Company',['Amsterdam','Argentina','Australia','Austria','Belgium','Bolivia','Brazil','Canada','Chile','Colombia','Costa Rica','Czech Republic','Denmark','Domincan Republic','Ecuador','Eucador','Fiji','Finland','France','Germany','Ghana','Grenada','Guatemala','Honduras','Hungary','Iceland','India','Ireland','Israel','Italy','Japan','Lithuania','Madagascar','Martinique','Mexico','Netherlands','New Zealand','Niacragua','Nicaragua','Peru','Philippines','Poland','Portugal','Puerto Rico','Russia','Sao Tome','Scotland','Singapore','South Africa','South Korea','Spain','St. Lucia','Suriname','Sweden','Switzerland','U.K.','U.S.A.','Venezuela','Vietnam','Wales']).
+pk('locations',['Company_Location']).
+relationship('CacaoBar','Ratings',['cacaobarid'],['RatingID'],toN).
+relationship('Company','CacaoBar',['companyid'],['cacaobarid'],toN).
+relationship('locations','Company',['null'],['companyid'],toN).

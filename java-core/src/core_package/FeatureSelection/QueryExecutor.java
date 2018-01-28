@@ -75,10 +75,10 @@ public class QueryExecutor implements Runnable {
             double absCorr = Math.abs(corr);
             dependenttime += System.nanoTime() - startcorrtodept;
 
-            //System.out.println("Correlation is " + corr);
+            System.out.println("Correlation is " + corr);
 
             if (absCorr > Environment.highCorrelationWarningThreshold) {
-//                System.out.println("This query has a high correlation. I'll discard it: \n" + sql);
+                System.out.println("This query has a high correlation. I'll discard it: \n" + sql);
                 continue; // run the next query
             }
 
