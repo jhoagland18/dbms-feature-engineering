@@ -1,1 +1,1 @@
-test
+The MAX returned among the previous Purchases of the Products where WHERE t2.online = 0

@@ -1,1 +1,1 @@
-test
+The AVG online among the previous Purchases of the Products where WHERE t2.returned = 1

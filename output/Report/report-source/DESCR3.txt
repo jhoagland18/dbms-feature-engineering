@@ -1,1 +1,1 @@
-test
+The MIN online among the previous Purchases of the Products where AND t3.gender = F

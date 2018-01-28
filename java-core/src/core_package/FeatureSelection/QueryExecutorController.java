@@ -36,11 +36,12 @@ public class QueryExecutorController {
 
     private HashMap<String,Double> target = new HashMap();
     private String dbConnectionType;
-
+    private String targetColName;
 
 
     public QueryExecutorController(int numThreads, String targetTablePK, String targetColName, String dbConnectionType, ArrayList<Query> queries) {
         this.dbConnectionType = dbConnectionType;
+        this.targetColName = targetColName;
         try {
             DatabaseConnection conn = DatabaseConnection.getConnectionForDBType(dbConnectionType);
             ResultSet rs = conn.query("SELECT ["+targetTablePK + "], [" + targetColName +
@@ -182,6 +183,7 @@ public class QueryExecutorController {
             e.printStackTrace();
         }
         
+        dictWriter.println("Attribute_ID\tAttribute_Descr\tSQL_Query");
         StringBuilder rowLine = new StringBuilder();
         StringBuilder dictLine = new StringBuilder();
 
@@ -190,14 +192,19 @@ public class QueryExecutorController {
 
         for(Query q: savedQueries) {
             String attName = "att_"+attNum;
-
+            String desc = q.getDescription();
+            desc = desc.replaceAll("\n", " ");
+            desc = desc.replaceAll("'", "");
+            String sql = q.getSQL();
+            sql = sql.replaceAll("\n", " ");
+            sql = sql.replaceAll("'", "");
             dictLine.setLength(0);
 
-            rowLine.append(", "+attName);
+            rowLine.append(","+attName);
 
-            dictLine.append(attName+"\n");
-            dictLine.append(q.getDescription()+"\n");
-            dictLine.append(q.getSQL()+"\n");
+            dictLine.append(attName+"\t");
+            dictLine.append(desc+"\t");
+            dictLine.append(sql);
             dictWriter.println(dictLine);
 
             attNum++;
@@ -205,7 +212,7 @@ public class QueryExecutorController {
 
         dictWriter.close();
 
-        rowLine.append(", Dep.");
+        rowLine.append(","+targetColName);
 
         rowWriter.println(rowLine.toString());
 
@@ -220,11 +227,11 @@ public class QueryExecutorController {
                 if(row.get(id)[0]==null) {
                     rowLine.append(",");
                 } else {
-                    rowLine.append(", " + row.get(id)[0]);
+                    rowLine.append("," + row.get(id)[0]);
                 }
             }
 
-            rowLine.append(", "+target.get(id));
+            rowLine.append(","+target.get(id));
 
             rowWriter.println(rowLine.toString());
 
