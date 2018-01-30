@@ -1,1 +1,1 @@
-The SUM online among the previous Purchases of the Clients where WHERE t2.returned = 1
+The MAX Rating among the previous Ratings of the CacaoBar where WHERE t2.Review_Date > 2013.0 AND t2.Review_Date <= 2014.0

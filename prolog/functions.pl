@@ -69,6 +69,6 @@ where_cond(Table,TableVarName,Att,And,Out) :-
 	attribute(Table,Att,numeric,_),
 	bin_boundaries(X,Y,Table,Att),
 	((And=1,FirstWord='AND ');(And=0,FirstWord='WHERE ')),
-	atomic_list_concat([FirstWord,TableVarName,'.',Att,' > ',X,' AND ',TableVarName,'.',Att,' < ',Y],Out).
+	atomic_list_concat([FirstWord,TableVarName,'.',Att,' > ',X,' AND ',TableVarName,'.',Att,' <= ',Y],Out).
 
 

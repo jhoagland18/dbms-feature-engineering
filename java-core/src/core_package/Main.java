@@ -71,13 +71,13 @@ public class Main {
 
 		System.out.println("Analyzing features...");
 
-		Process featureAnalyzer = Runtime.getRuntime().exec("py python-core/FeatureAnalyzer/featureAnalysis.py");
+		Process featureAnalyzer = Runtime.getRuntime().exec("python python-core/FeatureAnalyzer/featureAnalysis.py");
 
 		featureAnalyzer.waitFor();
 
 		System.out.println("Generating report web page...");
 
-		Process reportGenerator = Runtime.getRuntime().exec("py	" +
+		Process reportGenerator = Runtime.getRuntime().exec("python	" +
 				" python-core/ReportGenerator/reportGenerator.py");
 
 		System.out.println("Done.");
@@ -296,7 +296,7 @@ public class Main {
 		beanOrigin.add("Venezuela/ Ghana");
 		beanOrigin.add("Vietnam");
 		beanOrigin.add("West Africa");
-		cacao.addAttribute(new NominalAttribute("Broad Bean_Origin","",beanOrigin));
+		cacao.addAttribute(new NominalAttribute("[Broad Bean_Origin]","",beanOrigin));
 
 		cacao.addAttribute(new IDAttribute("CompanyID"));
 
@@ -422,19 +422,20 @@ public class Main {
 
 		ArrayList<Double> reviewDateImpValues = new ArrayList<>();
 		reviewDateImpValues.add(2015.0);
-		reviewDateImpValues.add(2011.0);
-		reviewDateImpValues.add(2008.0);
-		reviewDateImpValues.add(2010.0);
-		reviewDateImpValues.add(2007.0);
-		reviewDateImpValues.add(2014.0);
-		reviewDateImpValues.add(2017.0);
-		reviewDateImpValues.add(2009.0);
-		reviewDateImpValues.add(2006.0);
-		reviewDateImpValues.add(2013.0);
-		reviewDateImpValues.add(2012.0);
-		reviewDateImpValues.add(2016.0);
+//		reviewDateImpValues.add(2011.0);
+//		reviewDateImpValues.add(2008.0);
+//		reviewDateImpValues.add(2010.0);
+//		reviewDateImpValues.add(2007.0);
+//		reviewDateImpValues.add(2014.0);
+//		reviewDateImpValues.add(2017.0);
+//		reviewDateImpValues.add(2009.0);
+//		reviewDateImpValues.add(2006.0);
+//		reviewDateImpValues.add(2013.0);
+//		reviewDateImpValues.add(2012.0);
+//		reviewDateImpValues.add(2016.0);
 
 		ratings.addAttribute(new NumericAttribute("Review_Date", "", reviewDateImpValues));
+//		ratings.addAttribute(new TimeStampAttribute("TimeStamp", new ArrayList<Period>()));
 
 		ArrayList<Double> ratingImpValues = new ArrayList<>();
 		ratingImpValues.add(2.75);
@@ -455,9 +456,14 @@ public class Main {
 		ratings.setPrimaryKey(ratings.getAttributeByName("RatingID"));
 
         locations.addRelationship(new Relationship(locations, company, (IDAttribute)locations.getAttributeByName("Company_Locations"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.ToN)); //one location can have many companies
+        company.addRelationship(new Relationship(company,locations, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)locations.getAttributeByName("Company_Locations"),RelationshipType.To1));
+        
 		company.addRelationship(new Relationship(company, cacao, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.ToN)); //one oompany can have many cacaos
-        cacao.addRelationship(new Relationship(cacao, ratings, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)ratings.getAttributeByName("RatingID"),RelationshipType.ToN)); //one cacao can have many ratings
+		cacao.addRelationship(new Relationship(cacao, company, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.To1));
 
+		cacao.addRelationship(new Relationship(cacao, ratings, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)ratings.getAttributeByName("RatingID"),RelationshipType.ToN)); //one cacao can have many ratings
+		ratings.addRelationship(new Relationship(ratings, cacao, (IDAttribute)ratings.getAttributeByName("RatingID"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.To1));
+        
 		tables.add(cacao);
 		tables.add(ratings);
 		tables.add(company);

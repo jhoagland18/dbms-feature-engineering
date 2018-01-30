@@ -1,6 +1,10 @@
 package core_package.Schema;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+
 
 public class NumericAttribute extends Attribute {
 	
@@ -23,7 +27,9 @@ public class NumericAttribute extends Attribute {
 	 */
 	public NumericAttribute(String attributeName, String dimension, ArrayList<Double> binThresholds)  {
 		super(attributeName,dimension);
-		this.binThresholds = binThresholds;
+		ArrayList<Double> copyArr = new ArrayList<>(binThresholds);
+		Collections.sort(copyArr);
+		this.binThresholds = copyArr;
 	}
 
 }
