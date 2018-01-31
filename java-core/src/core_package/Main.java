@@ -91,51 +91,13 @@ public class Main {
 		cacao.setPrimaryKey(cacao.getAttributeByName("cacaobarid"));
 
 		ArrayList<Double> cacaoBins = new ArrayList<>();
-		cacaoBins.add(0.71);
-		cacaoBins.add(0.66);
-		cacaoBins.add(0.55);
+		cacaoBins.add(0.0);
 		cacaoBins.add(0.5);
-		cacaoBins.add(0.63);
-		cacaoBins.add(0.64);
-		cacaoBins.add(0.85);
-		cacaoBins.add(0.61);
-		cacaoBins.add(0.78);
-		cacaoBins.add(0.62);
-		cacaoBins.add(0.77);
-		cacaoBins.add(0.75);
-		cacaoBins.add(0.73);
-		cacaoBins.add(0.69);
-		cacaoBins.add(0.76);
-		cacaoBins.add(0.7);
-		cacaoBins.add(0.65);
-		cacaoBins.add(0.58);
-		cacaoBins.add(0.735);
-		cacaoBins.add(0.84);
-		cacaoBins.add(0.74);
-		cacaoBins.add(0.67);
-		cacaoBins.add(0.42);
-		cacaoBins.add(0.8);
-		cacaoBins.add(0.91);
-		cacaoBins.add(0.57);
-		cacaoBins.add(0.53);
-		cacaoBins.add(0.9);
-		cacaoBins.add(0.88);
 		cacaoBins.add(0.6);
-		cacaoBins.add(0.86);
-		cacaoBins.add(0.89);
-		cacaoBins.add(0.72);
-		cacaoBins.add(0.605);
-		cacaoBins.add(0.87);
-		cacaoBins.add(0.81);
-		cacaoBins.add(1.0);
-		cacaoBins.add(0.725);
-		cacaoBins.add(0.82);
-		cacaoBins.add(0.68);
-		cacaoBins.add(0.46);
-		cacaoBins.add(0.83);
-		cacaoBins.add(0.99);
-		cacaoBins.add(0.56);
-		cacaoBins.add(0.79);
+		cacaoBins.add(0.7);
+		cacaoBins.add(0.8);
+		cacaoBins.add(0.9);
+		cacaoBins.add(1000.0);
 
 		cacao.addAttribute(new NumericAttribute("Cocoa_Percent","percent",cacaoBins));
 
@@ -421,36 +383,15 @@ public class Main {
 		ratings.addAttribute(new IDAttribute("cacaobarid"));
 
 		ArrayList<Double> reviewDateImpValues = new ArrayList<>();
-		reviewDateImpValues.add(2015.0);
-//		reviewDateImpValues.add(2011.0);
-//		reviewDateImpValues.add(2008.0);
-//		reviewDateImpValues.add(2010.0);
-//		reviewDateImpValues.add(2007.0);
-//		reviewDateImpValues.add(2014.0);
-//		reviewDateImpValues.add(2017.0);
-//		reviewDateImpValues.add(2009.0);
-//		reviewDateImpValues.add(2006.0);
-//		reviewDateImpValues.add(2013.0);
-//		reviewDateImpValues.add(2012.0);
-//		reviewDateImpValues.add(2016.0);
-
-		ratings.addAttribute(new NumericAttribute("Review_Date", "", reviewDateImpValues));
-//		ratings.addAttribute(new TimeStampAttribute("TimeStamp", new ArrayList<Period>()));
+		ratings.addAttribute(new TimeStampAttribute("TimeStamp", new ArrayList<Period>()));
 
 		ArrayList<Double> ratingImpValues = new ArrayList<>();
-		ratingImpValues.add(2.75);
-		ratingImpValues.add(3.0);
-		ratingImpValues.add(3.25);
-		ratingImpValues.add(3.5);
-		ratingImpValues.add(1.5);
-		ratingImpValues.add(3.75);
-		ratingImpValues.add(4.0);
-		ratingImpValues.add(1.75);
+		ratingImpValues.add(0.0);
 		ratingImpValues.add(1.0);
-		ratingImpValues.add(2.25);
-		ratingImpValues.add(5.0);
-		ratingImpValues.add(2.5);
 		ratingImpValues.add(2.0);
+		ratingImpValues.add(3.0);
+		ratingImpValues.add(4.0);
+		ratingImpValues.add(5.0);
 		ratings.addAttribute(new NumericAttribute("Rating", "", ratingImpValues));
 		ratings.addAttribute(new IDAttribute("RatingID"));
 		ratings.setPrimaryKey(ratings.getAttributeByName("RatingID"));
@@ -461,8 +402,8 @@ public class Main {
 		company.addRelationship(new Relationship(company, cacao, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.ToN)); //one oompany can have many cacaos
 		cacao.addRelationship(new Relationship(cacao, company, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.To1));
 
-		cacao.addRelationship(new Relationship(cacao, ratings, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)ratings.getAttributeByName("RatingID"),RelationshipType.ToN)); //one cacao can have many ratings
-		ratings.addRelationship(new Relationship(ratings, cacao, (IDAttribute)ratings.getAttributeByName("RatingID"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.To1));
+		cacao.addRelationship(new Relationship(cacao, ratings, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)ratings.getAttributeByName("cacaobarid"),RelationshipType.ToN)); //one cacao can have many ratings
+		ratings.addRelationship(new Relationship(ratings, cacao, (IDAttribute)ratings.getAttributeByName("cacaobarid"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.To1));
         
 		tables.add(cacao);
 		tables.add(ratings);

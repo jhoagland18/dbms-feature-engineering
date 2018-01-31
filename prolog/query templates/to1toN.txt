@@ -1,3 +1,4 @@
+T0 = 'Ratings',
 Complexity=2,
 relationship(T0,T1,FK0,FK1,to1),
 relationship(T1,T2,FK2,FK3,toN),
@@ -9,12 +10,10 @@ sql_ON('t0','t1',FK0,FK1,'',OutFK1),
 sql_ON('t1','t2',FK2,FK3,'',OutFK2),
 time_stamp_condition(T0,T1,'t0','t1',Timestamp1),
 time_stamp_condition(T0,T2,'t0','t2',Timestamp2),
-
-% where condition of an attribute C != A in T2
+% where condition of an attribute C != A in T2 only if there is a "where" condition
 attribute(T2,C,TypeOfC,DimC),
-not(C=A),
 in(TypeOfC,[zero_one,numeric,nominal]),
-where_cond(T2,'t2',C,0,OutWhereCondition),
+(OutWhereCondition='';(not(C=A) , where_cond(T2,'t2',C,'WHERE ',OutWhereCondition))),
 
 % make description
 atomic_list_concat(['The ',Agg,' ', A,' among the previous ',T2,' of the ',T1, ' where ',OutWhereCondition],Description),
@@ -23,9 +22,9 @@ atomic_list_concat(['The ',Agg,' ', A,' among the previous ',T2,' of the ',T1, '
 atomic_list_concat([' \
 SELECT ', OutPK, ', ', Agg,'(t2.',A,  ')', ' \
 FROM ',T0,' t0\n',' \
-LEFT OUTER JOIN ',T1,' t1\n','ON ',OutFK1,' \
+INNER JOIN ',T1,' t1\n','ON ',OutFK1,' \
 ', Timestamp1,' \
-LEFT OUTER JOIN ',T2,' t2\n','ON ',OutFK2,' \
+INNER JOIN ',T2,' t2\n','ON ',OutFK2,' \
 ', Timestamp2,' \
 \n',OutWhereCondition,' \
 \nGROUP BY ',OutPK], Query).
