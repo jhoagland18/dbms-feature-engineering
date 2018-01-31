@@ -1,4 +1,3 @@
-T0 = 'Ratings',
 Complexity=2,
 relationship(T0,T1,FK0,FK1,to1),
 relationship(T1,T2,FK2,FK3,toN),
