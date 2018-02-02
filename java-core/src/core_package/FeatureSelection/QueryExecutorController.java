@@ -14,10 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -38,20 +35,24 @@ public class QueryExecutorController {
     private String dbConnectionType;
     private String targetColName;
 
+    HashSet<Integer> ancestors = new HashSet<Integer>();
+
 
     public QueryExecutorController(int numThreads, String targetTablePK, String targetColName, String dbConnectionType, ArrayList<Query> queries) {
         this.dbConnectionType = dbConnectionType;
         this.targetColName = targetColName;
         try {
             DatabaseConnection conn = DatabaseConnection.getConnectionForDBType(dbConnectionType);
-            ResultSet rs = conn.query("SELECT ["+targetTablePK + "], [" + targetColName +
-            "] FROM "+"ratings");
+            ResultSet rs = conn.query("SELECT newID() as newID,["+targetTablePK + "], [" + targetColName +
+            "] FROM "+"ratings"
+            +"\nORDER BY newID");
 
             Double value = 0.0;
             while(rs.next()) {
-                 value = rs.getDouble(2);
+                 value = rs.getDouble(3);
                 if(!rs.wasNull()) {
-                    target.put(rs.getString(1),value);
+                    target.put(rs.getString(2),value);
+                    //System.out.println("adding "+value+", "+rs.getString(2));
                 }
             }
 

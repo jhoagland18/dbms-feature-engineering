@@ -86,9 +86,9 @@ important_values('Company','company_location',['Amsterdam','Argentina','Australi
 attribute('Company', 'Company', 'nominal', '').
 important_values('Company','Company',['Amsterdam','Argentina','Australia','Austria','Belgium','Bolivia','Brazil','Canada','Chile','Colombia','Costa Rica','Czech Republic','Denmark','Domincan Republic','Ecuador','Eucador','Fiji','Finland','France','Germany','Ghana','Grenada','Guatemala','Honduras','Hungary','Iceland','India','Ireland','Israel','Italy','Japan','Lithuania','Madagascar','Martinique','Mexico','Netherlands','New Zealand','Niacragua','Nicaragua','Peru','Philippines','Poland','Portugal','Puerto Rico','Russia','Sao Tome','Scotland','Singapore','South Africa','South Korea','Spain','St. Lucia','Suriname','Sweden','Switzerland','U.K.','U.S.A.','Venezuela','Vietnam','Wales']).
 pk('locations',['Company_Location']).
-relationship('CacaoBar','Company',['cacaobarid'],['companyid'],to1).
+relationship('CacaoBar','Company',['null'],['companyid'],to1).
 relationship('CacaoBar','Ratings',['cacaobarid'],['cacaobarid'],toN).
 relationship('Ratings','CacaoBar',['cacaobarid'],['cacaobarid'],to1).
-relationship('Company','locations',['companyid'],['null'],to1).
-relationship('Company','CacaoBar',['companyid'],['cacaobarid'],toN).
-relationship('locations','Company',['null'],['companyid'],toN).
+relationship('Company','locations',['null'],['null'],to1).
+relationship('Company','CacaoBar',['companyid'],['null'],toN).
+relationship('locations','Company',['null'],['null'],toN).

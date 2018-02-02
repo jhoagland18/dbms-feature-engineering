@@ -1,6 +1,4 @@
 package core_package;
-import core_package.Exception.NoSuchDatabaseTypeException;
-import core_package.FeatureSelection.QueryExecutor;
 import core_package.FeatureSelection.QueryExecutorController;
 import core_package.QueryGeneration.DB2PrologLoader;
 import core_package.QueryGeneration.Query;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 
 
 import core_package.SchemaBuilder.DatabaseConnection;
-import core_package.SchemaBuilder.SchemaBuilder;
 import org.jpl7.*;
 
 //Created by Jackson Hoagland, Gayatri Krishnan, and Michele Samorani, during academic research with Santa Clara University on 9/29/2017
@@ -396,11 +393,11 @@ public class Main {
 		ratings.addAttribute(new IDAttribute("RatingID"));
 		ratings.setPrimaryKey(ratings.getAttributeByName("RatingID"));
 
-        locations.addRelationship(new Relationship(locations, company, (IDAttribute)locations.getAttributeByName("Company_Locations"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.ToN)); //one location can have many companies
-        company.addRelationship(new Relationship(company,locations, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)locations.getAttributeByName("Company_Locations"),RelationshipType.To1));
+        locations.addRelationship(new Relationship(locations, company, (IDAttribute)locations.getAttributeByName("Company_Locations"),(IDAttribute)company.getAttributeByName("company_locations"),RelationshipType.ToN)); //one location can have many companies
+        company.addRelationship(new Relationship(company,locations, (IDAttribute)company.getAttributeByName("company_locations"),(IDAttribute)locations.getAttributeByName("Company_Locations"),RelationshipType.To1));
         
-		company.addRelationship(new Relationship(company, cacao, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.ToN)); //one oompany can have many cacaos
-		cacao.addRelationship(new Relationship(cacao, company, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.To1));
+		company.addRelationship(new Relationship(company, cacao, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)cacao.getAttributeByName("companyid"),RelationshipType.ToN)); //one oompany can have many cacaos
+		cacao.addRelationship(new Relationship(cacao, company, (IDAttribute)cacao.getAttributeByName("companyid"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.To1));
 
 		cacao.addRelationship(new Relationship(cacao, ratings, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)ratings.getAttributeByName("cacaobarid"),RelationshipType.ToN)); //one cacao can have many ratings
 		ratings.addRelationship(new Relationship(ratings, cacao, (IDAttribute)ratings.getAttributeByName("cacaobarid"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.To1));
