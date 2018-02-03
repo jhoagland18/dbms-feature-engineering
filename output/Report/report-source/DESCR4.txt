@@ -1,1 +1,1 @@
-The MIN Rating among the previous Ratings of the CacaoBar where WHERE t2.Review_Date > 2016.0 AND t2.Review_Date <= 2017.0
+The MAX Rating among the previous Ratings of the Company where WHERE t2.[Broad Bean_Origin] = Peru

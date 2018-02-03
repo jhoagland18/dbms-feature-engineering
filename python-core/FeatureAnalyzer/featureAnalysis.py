@@ -17,8 +17,10 @@ if __name__ == "__main__":
     depVarName = df.columns[-1]
     df2 = df.fillna(df.mean())
     df2 = 100 * (df2 - df2.min()) / (df2.max() - df2.min())
+    df2[depVarName] = df[depVarName]
+
     X = df2.drop([depVarName],axis=1)
-    Y = df2[depVarName] / 100
+    Y = df2[depVarName]
     
     lr = lm.Lasso()
     lr.fit(X,Y)
@@ -54,3 +56,13 @@ if __name__ == "__main__":
         f = open(os.path.join(os.path.dirname(__file__), '../../output/Report/report-source/text_at_bottom.txt'),'w')
         f.write('Area under the curve obtained by AdaBoost in a 10-fold cross validation: ' +str(round(auc,4)))
         f.close()
+
+    if regression:
+        from sklearn.model_selection import train_test_split
+        import sklearn.metrics
+        X_train, X_test, y_train, y_test = train_test_split(X,Y,test_size=0.3,random_state=2)
+        from sklearn import linear_model
+        regLasso = linear_model.LinearRegression()
+        regLasso.fit(X_train,y_train)
+        y_pred = regLasso.predict(X_test)
+        print((y_pred - y_test).abs().mean())

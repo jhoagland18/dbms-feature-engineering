@@ -57,6 +57,8 @@ public class Main {
 		System.out.println("GENERATED QUERIES:");
 		for (Query q : queries)
 			System.out.println(q.getSQL());
+		
+		System.out.println("\nGENERATED "+queries.size()+" QUERIES BEFORE ANALYSIS:");
 
 		System.out.println("Executing queries and comparing correlation to dependant...");
 
@@ -83,10 +85,24 @@ public class Main {
 	}
 
 	private static void loadCacao() throws Exception {
-		Table cacao = new Table("CacaoBar");
-		cacao.addAttribute(new IDAttribute("cacaobarid"));
-		cacao.setPrimaryKey(cacao.getAttributeByName("cacaobarid"));
+		Table ratings = new Table("Ratings");
+		ratings.addAttribute(new IDAttribute("RatingID"));
 
+		ArrayList<Double> reviewDateImpValues = new ArrayList<>();
+		ratings.addAttribute(new TimeStampAttribute("TimeStamp", new ArrayList<Period>()));
+
+		ArrayList<Double> ratingImpValues = new ArrayList<>();
+		ratingImpValues.add(0.0);
+		ratingImpValues.add(1.0);
+		ratingImpValues.add(2.0);
+		ratingImpValues.add(3.0);
+		ratingImpValues.add(4.0);
+		ratingImpValues.add(5.0);
+		ratings.addAttribute(new NumericAttribute("Rating", "", ratingImpValues));
+
+		ratings.setPrimaryKey(ratings.getAttributeByName("RatingID"));
+
+		
 		ArrayList<Double> cacaoBins = new ArrayList<>();
 		cacaoBins.add(0.0);
 		cacaoBins.add(0.5);
@@ -96,7 +112,8 @@ public class Main {
 		cacaoBins.add(0.9);
 		cacaoBins.add(1000.0);
 
-		cacao.addAttribute(new NumericAttribute("Cocoa_Percent","percent",cacaoBins));
+
+		ratings.addAttribute(new NumericAttribute("Cocoa_Percent","percent",cacaoBins));
 
 		ArrayList<String> beanTypeImpValues = new ArrayList<>();
 		beanTypeImpValues.add("Nacional");
@@ -153,7 +170,8 @@ public class Main {
 		beanTypeImpValues.add("Trinitario");
 		beanTypeImpValues.add(" Nacional");
 
-		cacao.addAttribute(new NominalAttribute("Bean_Type","",beanTypeImpValues));
+
+		ratings.addAttribute(new NominalAttribute("Bean_Type","",beanTypeImpValues));
 
 		ArrayList<String> beanOrigin = new ArrayList<>();
 		beanOrigin.add("Africa, Carribean, C. Am.");
@@ -255,9 +273,11 @@ public class Main {
 		beanOrigin.add("Venezuela/ Ghana");
 		beanOrigin.add("Vietnam");
 		beanOrigin.add("West Africa");
-		cacao.addAttribute(new NominalAttribute("[Broad Bean_Origin]","",beanOrigin));
 
-		cacao.addAttribute(new IDAttribute("CompanyID"));
+		ratings.addAttribute(new NominalAttribute("[Broad Bean_Origin]","",beanOrigin));
+
+
+		ratings.addAttribute(new IDAttribute("companyid"));
 
 		Table company = new Table("Company");
 		company.addAttribute(new IDAttribute("companyid"));
@@ -376,33 +396,14 @@ public class Main {
 		locations.setPrimaryKey(locations.getAttributeByName("Company_Location"));
 
 
-		Table ratings = new Table("Ratings");
-		ratings.addAttribute(new IDAttribute("cacaobarid"));
-
-		ArrayList<Double> reviewDateImpValues = new ArrayList<>();
-		ratings.addAttribute(new TimeStampAttribute("TimeStamp", new ArrayList<Period>()));
-
-		ArrayList<Double> ratingImpValues = new ArrayList<>();
-		ratingImpValues.add(0.0);
-		ratingImpValues.add(1.0);
-		ratingImpValues.add(2.0);
-		ratingImpValues.add(3.0);
-		ratingImpValues.add(4.0);
-		ratingImpValues.add(5.0);
-		ratings.addAttribute(new NumericAttribute("Rating", "", ratingImpValues));
-		ratings.addAttribute(new IDAttribute("RatingID"));
-		ratings.setPrimaryKey(ratings.getAttributeByName("RatingID"));
 
         locations.addRelationship(new Relationship(locations, company, (IDAttribute)locations.getAttributeByName("Company_Locations"),(IDAttribute)company.getAttributeByName("company_locations"),RelationshipType.ToN)); //one location can have many companies
         company.addRelationship(new Relationship(company,locations, (IDAttribute)company.getAttributeByName("company_locations"),(IDAttribute)locations.getAttributeByName("Company_Locations"),RelationshipType.To1));
         
-		company.addRelationship(new Relationship(company, cacao, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)cacao.getAttributeByName("companyid"),RelationshipType.ToN)); //one oompany can have many cacaos
-		cacao.addRelationship(new Relationship(cacao, company, (IDAttribute)cacao.getAttributeByName("companyid"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.To1));
+		company.addRelationship(new Relationship(company, ratings, (IDAttribute)company.getAttributeByName("companyid"),(IDAttribute)ratings.getAttributeByName("companyid"),RelationshipType.ToN)); //one oompany can have many cacaos
+		ratings.addRelationship(new Relationship(ratings, company, (IDAttribute)ratings.getAttributeByName("companyid"),(IDAttribute)company.getAttributeByName("companyid"),RelationshipType.To1));
 
-		cacao.addRelationship(new Relationship(cacao, ratings, (IDAttribute)cacao.getAttributeByName("cacaobarid"),(IDAttribute)ratings.getAttributeByName("cacaobarid"),RelationshipType.ToN)); //one cacao can have many ratings
-		ratings.addRelationship(new Relationship(ratings, cacao, (IDAttribute)ratings.getAttributeByName("cacaobarid"),(IDAttribute)cacao.getAttributeByName("cacaobarid"),RelationshipType.To1));
-        
-		tables.add(cacao);
+       
 		tables.add(ratings);
 		tables.add(company);
 		tables.add(locations);

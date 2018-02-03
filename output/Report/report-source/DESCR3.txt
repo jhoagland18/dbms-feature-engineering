@@ -1,1 +1,1 @@
-The Review_Date of Ratings
+The MAX Rating among the previous Ratings of the Company where WHERE t2.[Broad Bean_Origin] = Madagascar
