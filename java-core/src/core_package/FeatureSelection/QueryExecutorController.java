@@ -38,13 +38,13 @@ public class QueryExecutorController {
     HashSet<Integer> ancestors = new HashSet<Integer>();
 
 
-    public QueryExecutorController(int numThreads, String targetTablePK, String targetColName, String dbConnectionType, ArrayList<Query> queries) {
+    public QueryExecutorController(int numThreads,String targetTableName, String targetTablePK, String targetColName, String dbConnectionType, ArrayList<Query> queries) {
         this.dbConnectionType = dbConnectionType;
         this.targetColName = targetColName;
         try {
             DatabaseConnection conn = DatabaseConnection.getConnectionForDBType(dbConnectionType);
             ResultSet rs = conn.query("SELECT newID() as newID,["+targetTablePK + "], [" + targetColName +
-            "] FROM "+"ratings"
+            "] FROM "+targetTableName
             +"\nORDER BY newID");
 
             Double value = 0.0;

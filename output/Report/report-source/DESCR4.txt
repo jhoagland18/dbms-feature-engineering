@@ -1,1 +1,1 @@
-The MAX Rating among the previous Ratings of the Company where WHERE t2.[Broad Bean_Origin] = Peru
+The SUM NewRating among the previous BinarizedRatings of the Company where WHERE t2.Cocoa_Percent > 0.7 AND t2.Cocoa_Percent <= 0.8

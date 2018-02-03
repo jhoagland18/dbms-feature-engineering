@@ -51,7 +51,7 @@ public class Main {
 
 		System.out.println("Generating feature queries...");
 
-		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("Ratings",
+		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("BinarizedRatings",
 		"prolog/query templates");
 
 		System.out.println("GENERATED QUERIES:");
@@ -63,7 +63,7 @@ public class Main {
 		System.out.println("Executing queries and comparing correlation to dependant...");
 
 		long startTime = System.nanoTime();
-		QueryExecutorController qec = new QueryExecutorController(4, "RatingID","rating", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
+		QueryExecutorController qec = new QueryExecutorController(4,"BinarizedRatings", "RatingID","NewRating", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
 		long elapsedTime = System.nanoTime() - startTime;
 
 		System.out.println("Correlation analysis finished. Elapsed time: "+elapsedTime/1000000000.0);
@@ -85,20 +85,22 @@ public class Main {
 	}
 
 	private static void loadCacao() throws Exception {
-		Table ratings = new Table("Ratings");
+//		Table ratings = new Table("Ratings");
+		Table ratings = new Table("BinarizedRatings");
 		ratings.addAttribute(new IDAttribute("RatingID"));
 
 		ArrayList<Double> reviewDateImpValues = new ArrayList<>();
 		ratings.addAttribute(new TimeStampAttribute("TimeStamp", new ArrayList<Period>()));
 
-		ArrayList<Double> ratingImpValues = new ArrayList<>();
-		ratingImpValues.add(0.0);
-		ratingImpValues.add(1.0);
-		ratingImpValues.add(2.0);
-		ratingImpValues.add(3.0);
-		ratingImpValues.add(4.0);
-		ratingImpValues.add(5.0);
-		ratings.addAttribute(new NumericAttribute("Rating", "", ratingImpValues));
+//		ArrayList<Double> ratingImpValues = new ArrayList<>();
+//		ratingImpValues.add(0.0);
+//		ratingImpValues.add(1.0);
+//		ratingImpValues.add(2.0);
+//		ratingImpValues.add(3.0);
+//		ratingImpValues.add(4.0);
+//		ratingImpValues.add(5.0);
+//		ratings.addAttribute(new NumericAttribute("Rating", "", ratingImpValues));
+		ratings.addAttribute(new ZeroOneAttribute("NewRating"));
 
 		ratings.setPrimaryKey(ratings.getAttributeByName("RatingID"));
 
