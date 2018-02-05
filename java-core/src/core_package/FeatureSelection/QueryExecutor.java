@@ -17,6 +17,9 @@ public class QueryExecutor implements Runnable {
     private QueryExecutorController queryExecutorController;
     private HashMap<String,Double> target;
 
+    private int numQueriesComplete = 0;
+    private int numQueriesNotified = 0;
+
     private ArrayList<Query> savedQueries;
     private DatabaseConnection conn;
 
@@ -48,6 +51,13 @@ public class QueryExecutor implements Runnable {
         savedQueries = new ArrayList<Query>();
 
         for(Query q: queries) {
+            numQueriesComplete++;
+
+            if((numQueriesComplete%(queries.size()/8))==0 || numQueriesComplete==queries.size()) {
+                int numCompletedSinceLast = numQueriesComplete-numQueriesNotified;
+                queryExecutorController.submitProgress(numCompletedSinceLast);
+                numQueriesNotified = numQueriesComplete;
+            }
             // text manipulation
             String sql = q.getSQL().substring(q.getSQL().indexOf("SELECT"));
             sql = sql.substring(0, sql.lastIndexOf('\''));
@@ -159,14 +169,14 @@ public class QueryExecutor implements Runnable {
         try {
             int numRows = 0;
             double sumRows = 0;
-            double avgRow = 0.0;
+            Double avgRow = 0.0;
 
             while(rs.next()) {
                 double value = rs.getDouble(2);
                 if(!rs.wasNull()) {
                     numRows++;
                     sumRows += value;
-                    Double[] values = {value,value};
+                    Double[] values = {value,avgRow};
                     predictorValues.put(rs.getString(1), values);
                 }
             }
@@ -175,21 +185,23 @@ public class QueryExecutor implements Runnable {
 
             Set<String> keys = target.keySet();
 
-            int numComparisons = 0;
+            int numNulls = 0;
+            int numNotNull = 0;
+
+
 
             for(String key: keys) {
 
-                numComparisons++;
-
-//                if(numComparisons>200 && correlation<Environment.minCorrelation) { //267
-//                    return correlation;
-//                }
                 Double[] values = {null,avgRow};
                 if(!predictorValues.containsKey(key)) {
                     predictorValues.put(key,values);
+                    numNulls++;
+                } else {
+                    numNotNull++;
                 }
 
                 numRowsCompared++;
+
                 double x = predictorValues.get(key)[1];
                 double y = target.get(key);
 
@@ -209,10 +221,17 @@ public class QueryExecutor implements Runnable {
                 // correlation is just a normalized covariation
                 correlation =  cov / sigmax / sigmay;
             }
+
+            if(((double)numNulls/(double)numRowsCompared)>Environment.maxNullsPercentage) {
+                return 0.0;
+            }
+
         } catch (Exception e) {
             //e.printStackTrace();
             return 0.0;
         }
+
+
 
         return correlation;
 

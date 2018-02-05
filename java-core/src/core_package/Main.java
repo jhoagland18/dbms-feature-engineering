@@ -51,7 +51,7 @@ public class Main {
 
 		System.out.println("Generating feature queries...");
 
-		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory("BinarizedRatings",
+		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory(Environment.targetTableName,
 		"prolog/query templates");
 
 		System.out.println("GENERATED QUERIES:");
@@ -63,20 +63,31 @@ public class Main {
 		System.out.println("Executing queries and comparing correlation to dependant...");
 
 		long startTime = System.nanoTime();
-		QueryExecutorController qec = new QueryExecutorController(4,"BinarizedRatings", "RatingID","NewRating", DatabaseConnection.MICROSOFT_SQL_SERVER, queries);
+		QueryExecutorController qec = new QueryExecutorController(4,Environment.targetTableName, Environment.targetTablePK,Environment.targetColName, queries);
+		DatabaseConnection conn=null;
+		try {
+			conn = DatabaseConnection.getConnectionForDBType(DatabaseConnection.MICROSOFT_SQL_SERVER);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		qec.setDatabaseConnection(conn);
+		qec.buildTargetHashMap();
+		qec.runCorrelationAnalysis();
+
 		long elapsedTime = System.nanoTime() - startTime;
 
 		System.out.println("Correlation analysis finished. Elapsed time: "+elapsedTime/1000000000.0);
 
 		System.out.println("Analyzing features...");
 
-		Process featureAnalyzer = Runtime.getRuntime().exec("python python-core/FeatureAnalyzer/featureAnalysis.py");
+		Process featureAnalyzer = Runtime.getRuntime().exec("py python-core/FeatureAnalyzer/featureAnalysis.py");
 
 		featureAnalyzer.waitFor();
 
 		System.out.println("Generating report web page...");
 
-		Process reportGenerator = Runtime.getRuntime().exec("python	" +
+		Process reportGenerator = Runtime.getRuntime().exec("py	" +
 				" python-core/ReportGenerator/reportGenerator.py");
 
 		System.out.println("Done.");

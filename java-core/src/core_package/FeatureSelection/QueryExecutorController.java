@@ -32,26 +32,47 @@ public class QueryExecutorController {
     private ArrayList<Query> savedQueries = new ArrayList<>();
 
     private HashMap<String,Double> target = new HashMap();
-    private String dbConnectionType;
+
+    private ArrayList<Query> queries;
+
+    private String targetTableName;
+    private String targetTablePK;
     private String targetColName;
+
+    private int numThreads;
+
+    private int progress = 0;
+    private int lastUpateValue = 0;
+
+    DatabaseConnection conn;
 
     HashSet<Integer> ancestors = new HashSet<Integer>();
 
 
-    public QueryExecutorController(int numThreads,String targetTableName, String targetTablePK, String targetColName, String dbConnectionType, ArrayList<Query> queries) {
-        this.dbConnectionType = dbConnectionType;
+    public QueryExecutorController(int numThreads,String targetTableName, String targetTablePK, String targetColName, ArrayList<Query> queries) {
         this.targetColName = targetColName;
+        this.targetTableName = targetTableName;
+        this.targetTablePK = targetTablePK;
+        this.numThreads = numThreads;
+        this.queries = queries;
+    }
+
+    public QueryExecutorController setDatabaseConnection(DatabaseConnection conn) {
+        this.conn = conn;
+        return this;
+    }
+
+    public QueryExecutorController buildTargetHashMap() {
         try {
-            DatabaseConnection conn = DatabaseConnection.getConnectionForDBType(dbConnectionType);
-            ResultSet rs = conn.query("SELECT newID() as newID,["+targetTablePK + "], [" + targetColName +
-            "] FROM "+targetTableName
-            +"\nORDER BY newID");
+            ResultSet rs = conn.query("SELECT newID() as newID,[" + targetTablePK + "], [" + targetColName +
+                    "] FROM " + targetTableName
+                    + "\nORDER BY newID");
 
             Double value = 0.0;
-            while(rs.next()) {
-                 value = rs.getDouble(3);
-                if(!rs.wasNull()) {
-                    target.put(rs.getString(2),value);
+            while (rs.next()) {
+                value = rs.getDouble(3);
+                if (!rs.wasNull()) {
+                    target.put(rs.getString(2), value);
                     //System.out.println("adding "+value+", "+rs.getString(2));
                 }
             }
@@ -60,21 +81,26 @@ public class QueryExecutorController {
             e.printStackTrace();
         }
 
+        return this;
+    }
+
+    public QueryExecutorController runCorrelationAnalysis() {
+
         executor = Executors.newFixedThreadPool(numThreads);
 
         //System.out.println("Total number of features to compare: "+queries.size());
-        for(int i=0; i<numThreads; i++) {
+        for (int i = 0; i < numThreads; i++) {
 
-            int listStart = i*(queries.size()/numThreads);
+            int listStart = i * (queries.size() / numThreads);
 
             int listEnd = 0;
-            if(i==numThreads-1) {
-            listEnd = queries.size();
+            if (i == numThreads - 1) {
+                listEnd = queries.size();
             } else {
                 listEnd = (i + 1) * (queries.size() / numThreads);
             }
 
-            List<Query> partition = queries.subList(listStart,listEnd);
+            List<Query> partition = queries.subList(listStart, listEnd);
             //System.out.println("Creating new QE: "+listStart+", "+listEnd);
             QueryExecutor qe = null;
             try {
@@ -92,12 +118,6 @@ public class QueryExecutorController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //System.out.println("number of saved queries to filter through: "+savedQueries.size());
-
-//        for(Query q: savedQueries) {
-//            System.out.println(q.getSQL());
-//        }
 
         for (int i = 0; i < savedQueries.size(); i++) {
             Query q1 = savedQueries.get(i);
@@ -133,30 +153,8 @@ public class QueryExecutorController {
 //            System.out.println("\nCorr: "+q.getCorrelationToDependent()+"\nSQL:\n"+q.getSQL());
 //        }
 
-
-
         writeFeatureValueSheet();
-    }
-
-    public void shutdownExecutor() throws InterruptedException {
-        executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.MINUTES);
-    }
-
-    public DatabaseConnection checkoutConnection() {
-        synchronized (connections) {
-//            System.out.println("Checking out connection. Remaining: "+connections.size());
-            if(connections.size()!=0) {
-                return connections.remove(0);
-            } else {
-                try {
-                    return DatabaseConnection.getConnectionForDBType(dbConnectionType);
-                } catch (NoSuchDatabaseTypeException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
+        return this;
     }
 
 
@@ -259,6 +257,17 @@ public class QueryExecutorController {
                 j = j-1;
             }
             queries.set(j+1, key);
+        }
+    }
+
+    public synchronized void submitProgress(int numQueriesComplete) {
+        progress+=numQueriesComplete;
+        if(((double)progress/(double)queries.size()*100.0)-10>lastUpateValue) {
+            lastUpateValue = (int)((double) progress / (double) queries.size() * 100.0);
+            System.out.println(lastUpateValue+"%");
+            return;
+        } else if(((double)progress/(double)queries.size()*100.0)>=100) {
+            System.out.println("100%");
         }
     }
 
