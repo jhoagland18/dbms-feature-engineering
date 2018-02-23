@@ -1,13 +1,16 @@
 package core_package.Schema;
 
+import core_package.Exception.NoSuchTableException;
+
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Schema {
 
-    private ArrayList<Table> tables = new ArrayList<>();
-    private ArrayList<Relationship> relationships = new ArrayList<>();
-
+    private HashSet<Table> tables = new HashSet<>();
 
     public void addTable(Table t) {
         tables.add(t);
@@ -17,31 +20,34 @@ public class Schema {
         tables.addAll(ts);
     }
 
-    public ArrayList<Table> getTables() {
+    public Set<Table> getTables() {
         return tables;
     }
 
-    public ArrayList<Relationship> getRelationships() {
-        return relationships;
-    }
-
-    public String toString() {
-        String toReturn = "Schema:";
+    public Table getTableByName(String name) throws NoSuchTableException {
         for(Table t: tables) {
-            toReturn+=t.getName()+":\nAttributes:\n"+t.getPrimaryKey().get(0).getAttributeName()+" ("+t.getPrimaryKey().get(0).getClass().getSimpleName()+") (PK)\n";
-            for(Attribute a: t.getAttributes()) {
-                toReturn+=a.getAttributeName()+" ("+a.getClass().getSimpleName()+")\n";
+            if(t.getName().equalsIgnoreCase(name)) {
+                return t;
             }
-            toReturn+="\n";
         }
-        toReturn+="Relationships:\n";
-        for(Relationship rel: relationships) {
-            toReturn+=rel.getTable1().getName() + "("+rel.getAttributes1().get(0).getAttributeName()+") -> " + rel.getTable2().getName() + "(" + rel.getAttributes2().get(0).getAttributeName() + ") "+rel.getRelationshipType()+"\n";
-        }
-        return toReturn;
+        return null;
     }
 
-    public void addRelationship(Relationship rel) {
-        relationships.add(rel);
+    public boolean hasTable(String name) {
+        for(Table t: tables) {
+            if(t.getName().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<Relationship> getRelationships() {
+        ArrayList<Relationship> rels = new ArrayList<>();
+        for(Table t: tables) {
+            rels.addAll(t.getRelationships());
+        }
+
+        return rels;
     }
 }

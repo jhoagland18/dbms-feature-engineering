@@ -7,6 +7,8 @@ import core_package.SchemaBuilder.Connection.MSSQLDatabaseConnection;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 public abstract class DatabaseConnection {
 
@@ -25,6 +27,7 @@ public abstract class DatabaseConnection {
 
 
     protected Connection con;
+    private String connType;
 
     /**
      * returns a connection object for the specified dbType string
@@ -82,6 +85,10 @@ public abstract class DatabaseConnection {
 
     public abstract String buildSQLToGetUniqueRows(String attName, Table t);
 
+    public abstract String buildSQLToGetTopXRowsByNewID(String attName, int numRows, Table t);
+
+    public abstract String buildSQLToGetTopXRowsOfTableByNewID(ArrayList<String> attnames, int numRows, Table t);
+
     /**
      * executes given SQL string parameter and returns a ResultSet containing the repsonse's data
      * @param sql
@@ -89,6 +96,10 @@ public abstract class DatabaseConnection {
      * @throws SQLException
      */
     public abstract ResultSet query(String sql) throws SQLException, Exception;
+
+    public abstract ResultSet query(String sql, Statement stmt) throws SQLException;
+
+    public abstract Connection getConnection();
 
 
 }

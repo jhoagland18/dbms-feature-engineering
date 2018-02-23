@@ -147,8 +147,6 @@ public class DB2PrologLoader {
 			return "nominal";
 		if (a.getClass() == NumericAttribute.class)
 			return "numeric";
-		if (a.getClass() == DateAttribute.class)
-			return "date";
 		if (a.getClass() == TimeStampAttribute.class)
 			return "timestamp";
 		if (a.getClass() == ZeroOneAttribute.class)

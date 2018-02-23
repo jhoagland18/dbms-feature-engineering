@@ -1,7 +1,11 @@
 package core_package.Schema;
 
+import org.omg.CORBA.NameValuePair;
+
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Table {
 	private String name;
@@ -11,6 +15,7 @@ public class Table {
 	private HashMap<String,Attribute> attributeByName;
 	private HashMap<String,ArrayList<Attribute> > attributesByDimension;
 	private HashMap<Class<? extends Attribute>,ArrayList<Attribute> > attributesByType;
+	private HashMap<String,HashMap<String,Integer>> rowSample;
 
 	// GETTER METHODS
 	
@@ -148,5 +153,13 @@ public class Table {
 		if (rel.getTable1() != this)
 			throw new Exception ("Table1 is not set correctly");
 		this.relationships.add(rel);
+	}
+
+	public void setRowSample(HashMap<String,HashMap<String,Integer>> rowSample) {
+		this.rowSample = rowSample;
+	}
+
+	public HashMap<String,HashMap<String, Integer>> getRowSample() {
+		return rowSample;
 	}
 }

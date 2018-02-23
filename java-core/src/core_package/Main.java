@@ -5,11 +5,15 @@ import core_package.QueryGeneration.Query;
 import core_package.QueryGeneration.QueryBuilder;
 import core_package.Schema.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Period;
 import java.util.ArrayList;
 
 
 import core_package.SchemaBuilder.DatabaseConnection;
+import core_package.SchemaBuilder.SchemaBuilder;
 import org.jpl7.*;
 
 //Created by Jackson Hoagland, Gayatri Krishnan, and Michele Samorani, during academic research with Santa Clara University on 9/29/2017
@@ -19,21 +23,31 @@ public class Main {
 	static ArrayList<Relationship> relationships = new ArrayList<>();
 	
 	public static void main (String [] args) throws Exception {
-	
-//	    try {
-//            SchemaBuilder sb = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER);
-//					System.out.println(sb.buildSchema().getSchema().toString());
-//
-//        Schema sc = new Schema();
-//	    sc.loadTables();
-//	    tables = sc.getTables();
-//	    relationships = sc.getRelationships();
-//        } catch (Exception e) {
-//    		loadTables();
-//        }
 
+		String input = "";
+
+		while(!input.equals("3")) {
+			System.out.println("Enter \'1\' to build a schema from the relationships csv.\n" +
+					"Enter \'2\' to perform a feature analysis of the database.\n" +
+					"Enter \'3\' to quit.");
+			BufferedReader reader =
+					new BufferedReader(new InputStreamReader(System.in));
+
+			// Reading data using readLine
+			input = reader.readLine();
+
+			if(input.equals("1")) {
+				SchemaBuilder sb = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER);
+				sb.buildSchema();
+			} else if(input.equals("2")) {
+				SchemaBuilder sb = new SchemaBuilder(DatabaseConnection.MICROSOFT_SQL_SERVER);
+				sb.loadSchema();
+				analyzeDatabase(sb.getSchema());
+			}
+		}
 
 		//loadDataconda();
+		/*
 		loadCacao();
 	    
 //	    System.out.println("********************");
@@ -91,8 +105,63 @@ public class Main {
 				" python-core/ReportGenerator/reportGenerator.py");
 
 		System.out.println("Done.");
-
+*/
 		return;
+	}
+
+	private static void analyzeDatabase(Schema sc) throws IOException, InterruptedException {
+		JPL.init();
+
+		System.out.println("Working Directory = " +
+				System.getProperty("user.dir"));
+
+		System.out.println("Loading database...");
+		DB2PrologLoader.LoadDB(
+				"prolog/functions.pl",
+				new ArrayList<Table>(sc.getTables()), sc.getRelationships());
+
+		System.out.println("Generating feature queries...");
+
+		ArrayList<Query> queries= QueryBuilder.buildQueriesFromDirectory(Environment.targetTableName,
+				"prolog/query templates");
+
+		System.out.println("GENERATED QUERIES:");
+		for (Query q : queries)
+			System.out.println(q.getSQL());
+
+		System.out.println("\nGENERATED "+queries.size()+" QUERIES BEFORE ANALYSIS:");
+
+		System.out.println("Executing queries and comparing correlation to dependant...");
+
+		long startTime = System.nanoTime();
+		QueryExecutorController qec = new QueryExecutorController(4,Environment.targetTableName, Environment.targetTablePK,Environment.targetColName, queries);
+		DatabaseConnection conn=null;
+		try {
+			conn = DatabaseConnection.getConnectionForDBType(DatabaseConnection.MICROSOFT_SQL_SERVER);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		qec.setDatabaseConnection(conn);
+		qec.buildTargetHashMap();
+		qec.runCorrelationAnalysis();
+
+		long elapsedTime = System.nanoTime() - startTime;
+
+		System.out.println("Correlation analysis finished. Elapsed time: "+elapsedTime/1000000000.0);
+
+		System.out.println("Analyzing features...");
+
+		Process featureAnalyzer = Runtime.getRuntime().exec("py python-core/FeatureAnalyzer/featureAnalysis.py");
+
+		featureAnalyzer.waitFor();
+
+		System.out.println("Generating report web page...");
+
+		Process reportGenerator = Runtime.getRuntime().exec("py	" +
+				" python-core/ReportGenerator/reportGenerator.py");
+
+		System.out.println("Done.");
 	}
 
 	private static void loadCacao() throws Exception {

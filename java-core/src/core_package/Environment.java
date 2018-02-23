@@ -17,4 +17,6 @@ public class Environment {
     public static Double maxFeatureCorrelation = 0.5;
 
     public static Double maxNullsPercentage = 0.98;
+
+    public static Double maxPercentageForNominal = 0.3;
 }
