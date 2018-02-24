@@ -152,13 +152,13 @@ public class Main {
 
 		System.out.println("Analyzing features...");
 
-		Process featureAnalyzer = Runtime.getRuntime().exec("py python-core/FeatureAnalyzer/featureAnalysis.py");
+		Process featureAnalyzer = Runtime.getRuntime().exec("python python-core/FeatureAnalyzer/featureAnalysis.py");
 
 		featureAnalyzer.waitFor();
 
 		System.out.println("Generating report web page...");
 
-		Process reportGenerator = Runtime.getRuntime().exec("py	" +
+		Process reportGenerator = Runtime.getRuntime().exec("python	" +
 				" python-core/ReportGenerator/reportGenerator.py");
 
 		System.out.println("Done.");

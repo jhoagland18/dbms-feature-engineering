@@ -5,11 +5,7 @@ import core_package.Exception.NoSuchCardinalityException;
 import core_package.Exception.NoSuchDatabaseTypeException;
 import core_package.Exception.NoSuchTableException;
 import core_package.Schema.*;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextAreaEditorKit;
 import org.w3c.dom.Attr;
-import sun.plugin2.ipc.unix.UnixIPCFactory;
 
 import javax.naming.directory.NoSuchAttributeException;
 import java.io.*;
@@ -324,7 +320,9 @@ public class SchemaBuilder {
                 out+=ATTRIBUTE_TYPE_NOMINAL;
                 //bins
                 for(String s: ((NominalAttribute) att).getImportantValues()) {
-                    out+=","+ StringEscapeUtils.escapeCsv(s);
+                	String sWithNoCommas = s.indexOf(",") >= 0 ? "\"" + s + "\"" : s;
+                	sWithNoCommas.replace("'", "\\'");
+                    out+=","+ sWithNoCommas;
                 }
             } else if(att instanceof NumericAttribute) {
                 out+=ATTRIBUTE_TYPE_NUMERIC;
@@ -427,7 +425,9 @@ public class SchemaBuilder {
                 numRows+=values.get(value);
 
                 if(isNumeric) {
-                    isNumeric = NumberUtils.isNumber(value);
+                	try {
+                		double v = Double.parseDouble(value);
+                	}catch(Exception e) {isNumeric = false;}
                 }
 
                 if(isBinary) {
