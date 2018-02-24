@@ -13,7 +13,7 @@ public class Environment {
     public static String sqlConnectionUrl = "jdbc:sqlserver://localhost:1433;databasename="+dbName+";integratedSecurity=true";
     
     public static Double highCorrelationWarningThreshold = 0.8;
-    public static Double minCorrelation = 0.05;
+    public static Double minCorrelation = 0.01;
     public static Double maxFeatureCorrelation = 0.5;
 
     public static Double maxNullsPercentage = 0.98;

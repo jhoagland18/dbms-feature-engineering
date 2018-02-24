@@ -1,1 +1,1 @@
-Area under the curve obtained by AdaBoost in a 10-fold cross validation: 0.6522
+Area under the curve obtained by AdaBoost in a 10-fold cross validation: 0.4876

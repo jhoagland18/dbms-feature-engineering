@@ -64,15 +64,14 @@ public class QueryExecutorController {
 
     public QueryExecutorController buildTargetHashMap() {
         try {
-            ResultSet rs = conn.query("SELECT newID() as newID,[" + targetTablePK + "], [" + targetColName +
-                    "] FROM " + targetTableName
-                    + "\nORDER BY newID");
+            ResultSet rs = conn.query("SELECT [" + targetTablePK + "], [" + targetColName +
+                    "] FROM " + targetTableName);
 
             Double value = 0.0;
             while (rs.next()) {
-                value = rs.getDouble(3);
+                value = rs.getDouble(2);
                 if (!rs.wasNull()) {
-                    target.put(rs.getString(2), value);
+                    target.put(rs.getString(1), value);
                     //System.out.println("adding "+value+", "+rs.getString(2));
                 }
             }

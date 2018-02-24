@@ -60,7 +60,6 @@ public class QueryBuilder {
 		while ((curLine = br.readLine()) != null) {
 				code += curLine + "\n";
 		}
-		System.out.println(code);
 		Boolean provable = org.jpl7.Query.hasSolution(code);
 //		System.out.println("The code is " + (provable ? "provable" : "not provable"));
 //		System.out.println("Code: " + code);

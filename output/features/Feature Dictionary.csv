@@ -1,1 +1,2 @@
 Attribute_ID	Attribute_Descr	SQL_Query
+att_0	The MAX [Cocoa_Percent] among the previous BinarizedRatings of the Company where WHERE t2.[Rating] > 2.5 AND t2.[Rating] <= 2.75	 SELECT t0.[companyid], MAX(t2.[Cocoa_Percent]) FROM BinarizedRatings t0  INNER JOIN Company t1 ON t0.[companyid] = t1.[companyid]  INNER JOIN BinarizedRatings t2 ON t1.[companyid] = t2.[companyid] AND t0.[TimeStamp] > t2.[TimeStamp]  WHERE t2.[Rating] > 2.5 AND t2.[Rating] <= 2.75  GROUP BY t0.[companyid]

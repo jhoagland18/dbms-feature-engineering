@@ -61,6 +61,8 @@ public class SchemaBuilder {
     protected static final Set<String> DATA_TYPES_TIME = new HashSet<String>(Arrays.asList(
             new String[]{DATA_TYPE_TIME, DATA_TYPE_DATETIME, DATA_TYPE_DATE}));
 
+    private static String delimiter = "@@@";
+
     private Schema schema;
     private DatabaseConnection conn;
 
@@ -126,7 +128,7 @@ public class SchemaBuilder {
 
         BufferedReader br;
         String line = "";
-        String csvDelimiter = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+        //String csvDelimiter = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
 
         if (tableFiles != null) {
 
@@ -136,12 +138,17 @@ public class SchemaBuilder {
                 String nameWithExt = tableFile.getName();
                 String nameWithoutExt = nameWithExt.substring(0,nameWithExt.lastIndexOf("."));
                 Table t = this.getSchema().getTableByName(nameWithoutExt);
-                System.out.println("Table already contains "+t.getAttributes().toString());
 
                 while ((line = br.readLine()) != null) {
-                    String[] data = line.split(csvDelimiter,-1);
+                    String[] data = line.split(delimiter,-1);
+                    System.out.println(data[0]);
                     String attName = data[0];
                     String attType = data[1];
+
+                    if(attName.startsWith("\"") && attName.endsWith("\"")) {
+                        attName.substring(1);
+                        attName.substring(0,attName.length());
+                    }
                     ArrayList<String> attBins = new ArrayList<>();
 
                     for (int i = 2; i < data.length; i++) {
@@ -168,6 +175,10 @@ public class SchemaBuilder {
                         newAtt = new TimeStampAttribute(attName,periodBins);
                     } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_ZEROONE)) {
                         newAtt = new ZeroOneAttribute(attName);
+                    }
+
+                    if(newAtt==null) {
+                        System.out.println("newatt is "+newAtt+" "+attName);
                     }
 
                     t.addAttribute(newAtt);
@@ -200,8 +211,8 @@ public class SchemaBuilder {
                 String[] data = line.split(csvDelimiter,-1);
                 String t1Name = data[0];
                 String t2Name = data[1];
-                String t1key = data[2];
-                String t2key = data[3];
+                String t1key = "["+data[2]+"]";
+                String t2key = "["+data[3]+"]";
                 String cardinality = data[4];
 
                 try {
@@ -284,13 +295,14 @@ public class SchemaBuilder {
             System.out.println("PK for "+t.getName()+" is EMPTY!!!");
         }
         for(Attribute att: t.getPrimaryKey()) {
-            out+=att.getAttributeName()+",id\n";
+            out+=att.getAttributeName()+delimiter+"id\n";
             pknames.add(att.getAttributeName());
         }
 
         for(Attribute att: t.getAttributes()) {
             boolean attInTable = false;
             for(String attName: t.getRowSample().keySet()) {
+                attName = "["+attName+"]";
                 if(attName.equalsIgnoreCase(att.getAttributeName())) {
                     attInTable = true;
                     break;
@@ -314,27 +326,27 @@ public class SchemaBuilder {
                 continue;
             }
 
-            out+=att.getAttributeName()+",";
+            out+=att.getAttributeName()+delimiter;
 
             if(att instanceof NominalAttribute) {
                 out+=ATTRIBUTE_TYPE_NOMINAL;
                 //bins
                 for(String s: ((NominalAttribute) att).getImportantValues()) {
-                	String sWithNoCommas = s.indexOf(",") >= 0 ? "\"" + s + "\"" : s;
-                	sWithNoCommas.replace("'", "\\'");
-                    out+=","+ sWithNoCommas;
+                	String sWithNoCommas = s.indexOf(delimiter) >= 0 ? "\"" + s + "\"" : s;
+                	sWithNoCommas = sWithNoCommas.replace("'", "\\'");
+                    out+=delimiter+ sWithNoCommas;
                 }
             } else if(att instanceof NumericAttribute) {
                 out+=ATTRIBUTE_TYPE_NUMERIC;
                 //bins
                 for(Double d: ((NumericAttribute) att).getBinThresholds()) {
-                    out+=","+d;
+                    out+=delimiter+d;
                 }
             } else if(att instanceof TimeStampAttribute) {
                 out+=ATTRIBUTE_TYPE_TIMESTAMP;
                 //bins
                 for(Period p:((TimeStampAttribute) att).getBinThresholds()) {
-                    out+=","+p.toString();
+                    out+=delimiter+p.toString();
                 }
             } else if(att instanceof ZeroOneAttribute) {
                 out+=ATTRIBUTE_TYPE_ZEROONE;
@@ -362,7 +374,6 @@ public class SchemaBuilder {
         }
 
         ArrayList<String> attNames = new ArrayList<>();
-        System.out.println("atts for "+t.getName()+" are");
         for(String s: sampleRows.keySet()) {
             System.out.print(" "+s);
             attNames.add(s);
@@ -408,9 +419,11 @@ public class SchemaBuilder {
 
 
         for(String attributeName: attributeNames) {
-            if(tablePkNames.contains(attributeName) || (t.getAttributeByName(attributeName)!=null)) {
+            if(tablePkNames.contains("["+attributeName+"]") || (t.getAttributeByName(attributeName)!=null)) {
                 continue;
             }
+
+
 
             boolean isNumeric = true;
             boolean isBinary = true;
@@ -444,6 +457,8 @@ public class SchemaBuilder {
                     }
                 }
             }
+
+            attributeName = "["+attributeName+"]";
 
             int numUniqueValues = values.keySet().size();
 
