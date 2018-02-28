@@ -1,0 +1,1 @@
+The AVG [NewRating] among the previous BinarizedRatings of the Company where WHERE t2.[Broad Bean_Origin] = Bolivia

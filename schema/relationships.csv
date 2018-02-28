@@ -1,4 +1,4 @@
-Company,BinarizedRatings,companyid,companyid,ToN
-BinarizedRatings,Company,companyid,companyid,To1
-Locations,Company,Company_location,company_location,ToN
-Company,Locations,company_location,company_location,To1
+Company,BinarizedRatings,#companyid#,companyid,ToN
+BinarizedRatings,Company,companyid,#companyid#,To1
+Locations,Company,#Company_location#,company_location,ToN
+Company,Locations,company_location,#company_location#,To1

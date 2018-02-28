@@ -84,7 +84,7 @@ public class QueryExecutor implements Runnable {
 
             double absCorr = Math.abs(corr);
             dependenttime += System.nanoTime() - startcorrtodept;
-
+            //System.out.println("SQL is "+q.getSQL());
             System.out.println("Correlation is " + corr);
 
             if (absCorr > Environment.highCorrelationWarningThreshold) {

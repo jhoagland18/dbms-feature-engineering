@@ -141,6 +141,7 @@ public class SchemaBuilder {
 
                 while ((line = br.readLine()) != null) {
                     String[] data = line.split(delimiter,-1);
+                    System.out.println("line " +Arrays.toString(data));
                     System.out.println(data[0]);
                     String attName = data[0];
                     String attType = data[1];
@@ -159,6 +160,7 @@ public class SchemaBuilder {
 
                     if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_ID)) {
                         continue;
+//                        newAtt = new IDAttribute(attName);
                     } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NOMINAL)) {
                         newAtt = new NominalAttribute(attName,null,attBins);
                     } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NUMERIC)) {
@@ -178,7 +180,7 @@ public class SchemaBuilder {
                     }
 
                     if(newAtt==null) {
-                        System.out.println("newatt is "+newAtt+" "+attName);
+                        System.out.println("newatt is "+newAtt+" "+attName+ " type: "+attType);
                     }
 
                     t.addAttribute(newAtt);
@@ -196,13 +198,12 @@ public class SchemaBuilder {
 
 
 
-    private void loadRelationships() throws IOException, NoSuchCardinalityException {
+    private void loadRelationships() throws Exception {
         String filePath = "schema\\relationships.csv";
 
         BufferedReader br = null;
         String line = "";
         String csvDelimiter = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
-        String keyDelimiter = "|";
 
         try {
             br = new BufferedReader(new FileReader(filePath));
@@ -211,6 +212,16 @@ public class SchemaBuilder {
                 String[] data = line.split(csvDelimiter,-1);
                 String t1Name = data[0];
                 String t2Name = data[1];
+                boolean t1keyIsPk = data[2].startsWith("#") && data[2].endsWith("#");
+                boolean t2keyIsPk = data[3].startsWith("#") && data[3].endsWith("#");
+                if(t1keyIsPk) {
+                    data[2] = data[2].substring(1);
+                    data[2] = data[2].substring(0,data[2].length()-1);
+                }
+                if(t2keyIsPk) {
+                    data[3] = data[3].substring(1);
+                    data[3] = data[3].substring(0,data[3].length()-1);
+                }
                 String t1key = "["+data[2]+"]";
                 String t2key = "["+data[3]+"]";
                 String cardinality = data[4];
@@ -230,39 +241,40 @@ public class SchemaBuilder {
                         schema.addTable(t2);
                     }
 
-                    if(t1.getPrimaryKey().size()==0) {
+                    if(t1.getPrimaryKey().size()==0 && t1keyIsPk) {
                         t1.setPrimaryKey(new IDAttribute(t1key));
-                    } else {
-
-                        Iterator<Attribute> iter = t1.getPrimaryKey().iterator();
-                        boolean found = false;
-
-                        while(iter.hasNext()) { //add id to table if not already in table
-                            Attribute att = iter.next();
-                            if (att.getAttributeName().equalsIgnoreCase(t1key)) {
-                                found = true;
-                            }
-                        }
-
-                        if (!found) { //if pk not in table
+                    } else if(t1keyIsPk && !tableContainsPrimaryKey(t1,t1key)){
+                        if(tableContainsPrimaryKey(t1,t1key)) {
                             ArrayList<Attribute> pks = t1.getPrimaryKey();
                             pks.add(new IDAttribute(t1key));
                             t1.setPrimaryKey(pks);
                         }
                     }
 
-                    if(t2.getAttributeByName(t2key)==null) { //add fk to t2 if not already in
-                        t2.addAttribute(new IDAttribute(t2key));
+                    if(t2.getPrimaryKey().size()==0 && t2keyIsPk) {
+                        t2.setPrimaryKey(new IDAttribute(t2key));
+                    } else if(t2keyIsPk && !tableContainsPrimaryKey(t2,t2key)){
+                        if(tableContainsPrimaryKey(t2,t2key)) {
+                            ArrayList<Attribute> pks = t2.getPrimaryKey();
+                            pks.add(new IDAttribute(t2key));
+                            t2.setPrimaryKey(pks);
+                        }
                     }
+
+
 
                     IDAttribute att1=null;
                     IDAttribute att2=null;
 
-                    for(Attribute att:t1.getPrimaryKey()) {
-                        if(att.getAttributeName().equals(t1key)) {
-                            att1 = (IDAttribute)att;
-                        }
+                    if(!tableContainsAttribute(t1,t1key)) { //add fk to t2 if not already in
+                        t1.addAttribute(new IDAttribute(t1key));
                     }
+
+                    if(!tableContainsAttribute(t2,t2key)) { //add fk to t2 if not already in
+                        t2.addAttribute(new IDAttribute(t2key));
+                    }
+
+                    att1 = (IDAttribute) t1.getAttributeByName(t1key);
 
                     att2 = (IDAttribute) t2.getAttributeByName(t2key);
 
@@ -279,12 +291,25 @@ public class SchemaBuilder {
                     Relationship r = new Relationship(t1, t2, att1 , att2, type);
 
                     t1.addRelationship(r);
+
+
                 } catch (NoSuchTableException e) {
                     e.printStackTrace();
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        for(Table t:this.getSchema().getTables()) {
+            if(t.getName().equalsIgnoreCase(Environment.targetTableName)) {
+                if(!tableContainsPrimaryKey(t,"["+Environment.targetTablePK+"]")) {
+                    ArrayList<Attribute> pks = t.getPrimaryKey();
+                    pks.add(new IDAttribute("[" + Environment.targetTablePK+"]"));
+                    t.setPrimaryKey(pks);
+                }
+                break;
+            }
         }
     }
 
@@ -300,7 +325,9 @@ public class SchemaBuilder {
         }
 
         for(Attribute att: t.getAttributes()) {
+
             boolean attInTable = false;
+
             for(String attName: t.getRowSample().keySet()) {
                 attName = "["+attName+"]";
                 if(attName.equalsIgnoreCase(att.getAttributeName())) {
@@ -311,7 +338,7 @@ public class SchemaBuilder {
             }
 
             if(!attInTable) {
-                throw new NoSuchAttributeException("Attribute " + att.getAttributeName() + " could not be found for table " + t.getName() + ". Check the spelling in the relationships csv and try again");
+                throw new NoSuchAttributeException("Attribute " + att.getAttributeName() + " could not be found in table " + t.getName() + ". Check the spelling in the relationships csv and try again");
             }
 
             boolean ispk = false;
@@ -332,9 +359,9 @@ public class SchemaBuilder {
                 out+=ATTRIBUTE_TYPE_NOMINAL;
                 //bins
                 for(String s: ((NominalAttribute) att).getImportantValues()) {
-                	String sWithNoCommas = s.indexOf(delimiter) >= 0 ? "\"" + s + "\"" : s;
-                	sWithNoCommas = sWithNoCommas.replace("'", "\\'");
-                    out+=delimiter+ sWithNoCommas;
+                	s = s.replace("'", "\\'");
+                	if(!s.isEmpty())
+                        out+=delimiter+s;
                 }
             } else if(att instanceof NumericAttribute) {
                 out+=ATTRIBUTE_TYPE_NUMERIC;
@@ -350,6 +377,8 @@ public class SchemaBuilder {
                 }
             } else if(att instanceof ZeroOneAttribute) {
                 out+=ATTRIBUTE_TYPE_ZEROONE;
+            } else if(att instanceof IDAttribute) {
+                out+=ATTRIBUTE_TYPE_ID;
             }
             out+="\n";
         }
@@ -416,10 +445,10 @@ public class SchemaBuilder {
             tablePkNames.add(a.getAttributeName());
         }
 
-
+        System.out.println("PKs for "+t.getName()+" are "+tablePkNames.toString());
 
         for(String attributeName: attributeNames) {
-            if(tablePkNames.contains("["+attributeName+"]") || (t.getAttributeByName(attributeName)!=null)) {
+            if(tableContainsAttribute(t,"["+attributeName+"]")) {
                 continue;
             }
 
@@ -440,13 +469,17 @@ public class SchemaBuilder {
                 if(isNumeric) {
                 	try {
                 		double v = Double.parseDouble(value);
-                	}catch(Exception e) {isNumeric = false;}
-                }
 
-                if(isBinary) {
-                    if(!value.equals("0") && !value.equals("1")) { //if not zero and not one
-                        isBinary = false;
-                    }
+                        if(isBinary) {
+                            if(v!=0 && v!=1) { //if not zero and not one
+                                isBinary = false;
+                            }
+                        }
+
+                	}catch(Exception e) {
+                	    isNumeric = false;
+                	    isBinary = false;
+                	}
                 }
 
                 if(isTimeStamp) {
@@ -495,7 +528,6 @@ public class SchemaBuilder {
                 }
 
                 t.addAttribute(new NumericAttribute(attributeName,null,numericBins));
-                System.out.println("Numeric bins for "+attributeName+" are "+numericBins.toString());
             } else {
                 //TODO what to do if nothing is common enough to be an important value?
                 ArrayList<String> nominalBins = new ArrayList<>();
@@ -505,7 +537,6 @@ public class SchemaBuilder {
                     }
                 }
                 t.addAttribute(new NominalAttribute(attributeName,null,nominalBins));
-                System.out.println("Nominal bins for "+attributeName+" are "+nominalBins.toString());
             }
         }
     }
@@ -514,6 +545,24 @@ public class SchemaBuilder {
         ResultSet rs = conn.query(conn.buildSQLToGetDifferenceBetweenTotalAndNumUnique(attName, t));
         int diff = Integer.parseInt(rs.getString(1));
         return diff==0 ? true : false;
+    }
+
+    public boolean tableContainsAttribute(Table t, String attName) {
+        for(Attribute att: t.getAttributes()) {
+            if(att.getAttributeName().equalsIgnoreCase(attName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean tableContainsPrimaryKey(Table t, String attName) {
+        for(Attribute att: t.getPrimaryKey()) {
+            if(att.getAttributeName().equalsIgnoreCase(attName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

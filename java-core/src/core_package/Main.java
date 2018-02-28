@@ -116,6 +116,9 @@ public class Main {
 				System.getProperty("user.dir"));
 
 		System.out.println("Loading database...");
+		for(Table t: sc.getTables()) {
+			System.out.println("PK for "+t.getName() + " is "+t.getPrimaryKey());
+		}
 		DB2PrologLoader.LoadDB(
 				"prolog/functions.pl",
 				new ArrayList<Table>(sc.getTables()), sc.getRelationships());
