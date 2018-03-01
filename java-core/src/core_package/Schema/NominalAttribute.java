@@ -13,6 +13,13 @@ public class NominalAttribute extends Attribute {
 	public ArrayList<String> getImportantValues() {
 		return importantValues;
 	}
+
+	/**
+	 * @param importantValues
+	 */
+	public void setImportantValues(ArrayList<String> importantValues) {
+		this.importantValues = importantValues;
+	}
 	
 	/**
 	 * 

@@ -49,6 +49,19 @@ public class Table {
 	 * @return the attribute with that name
 	 */
 	public  Attribute getAttributeByName(String name) {return attributeByName.get(name);}
+
+	/**
+	 * @param name
+	 * @return the attribute with that name
+	 */
+	public Attribute getAttrbuteByNameIgnoreCase(String name) {
+		for(Attribute att: attributes) {
+			if(att.getAttributeName().equalsIgnoreCase(name)) {
+				return att;
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * 

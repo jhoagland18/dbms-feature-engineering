@@ -1,4 +1,5 @@
 package core_package.SchemaBuilder;
+import alice.tuprolog.Int;
 import core_package.Environment;
 import core_package.Exception.NoPrimaryKeyIdentifiedException;
 import core_package.Exception.NoSuchCardinalityException;
@@ -196,8 +197,6 @@ public class SchemaBuilder {
         }
     }
 
-
-
     private void loadRelationships() throws Exception {
         String filePath = "schema\\relationships.csv";
 
@@ -222,8 +221,10 @@ public class SchemaBuilder {
                     data[3] = data[3].substring(1);
                     data[3] = data[3].substring(0,data[3].length()-1);
                 }
-                String t1key = "["+data[2]+"]";
-                String t2key = "["+data[3]+"]";
+
+                String t1key = encloseInBrackets(data[2]);
+                String t2key = encloseInBrackets(data[3]);
+
                 String cardinality = data[4];
 
                 try {
@@ -241,30 +242,65 @@ public class SchemaBuilder {
                         schema.addTable(t2);
                     }
 
+                    Attribute t1Att, t2Att;
+
+                    if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL))) {
+                        t1Att = new NominalAttribute(t1Name,null,null);
+                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                    } else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC))) {
+                        t1Att = new NumericAttribute(t1Name,null,null);
+                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                    } else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP))) {
+                        t1Att = new TimeStampAttribute(t1Name,new ArrayList<Period>());
+                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                    }  else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE))) {
+                        t1Att = new ZeroOneAttribute(t1Name);
+                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                    } else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ID))) {
+                        t1Att = new IDAttribute(t1Name);
+                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                    } else {
+                        t1Att = new IDAttribute(t1key);
+                    }
+
+                    if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL))) {
+                        t2Att = new NominalAttribute(t2Name,null,null);
+                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                    } else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC))) {
+                        t2Att = new NumericAttribute(t2Name,null,null);
+                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                    } else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP))) {
+                        t2Att = new TimeStampAttribute(t2Name,new ArrayList<Period>());
+                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                    }  else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE))) {
+                        t2Att = new ZeroOneAttribute(t2Name);
+                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                    } else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ID))) {
+                        t2Att = new IDAttribute(t2Name);
+                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                    } else {
+                        t2Att = new IDAttribute(t2key);
+                    }
+
                     if(t1.getPrimaryKey().size()==0 && t1keyIsPk) {
-                        t1.setPrimaryKey(new IDAttribute(t1key));
+                        t1.setPrimaryKey(t1Att);
                     } else if(t1keyIsPk && !tableContainsPrimaryKey(t1,t1key)){
                         if(tableContainsPrimaryKey(t1,t1key)) {
                             ArrayList<Attribute> pks = t1.getPrimaryKey();
-                            pks.add(new IDAttribute(t1key));
+                            pks.add(t1Att);
                             t1.setPrimaryKey(pks);
                         }
                     }
 
                     if(t2.getPrimaryKey().size()==0 && t2keyIsPk) {
-                        t2.setPrimaryKey(new IDAttribute(t2key));
+                        t2.setPrimaryKey(t2Att);
                     } else if(t2keyIsPk && !tableContainsPrimaryKey(t2,t2key)){
                         if(tableContainsPrimaryKey(t2,t2key)) {
                             ArrayList<Attribute> pks = t2.getPrimaryKey();
-                            pks.add(new IDAttribute(t2key));
+                            pks.add(t2Att);
                             t2.setPrimaryKey(pks);
                         }
                     }
-
-
-
-                    IDAttribute att1=null;
-                    IDAttribute att2=null;
 
                     if(!tableContainsAttribute(t1,t1key)) { //add fk to t2 if not already in
                         t1.addAttribute(new IDAttribute(t1key));
@@ -273,10 +309,6 @@ public class SchemaBuilder {
                     if(!tableContainsAttribute(t2,t2key)) { //add fk to t2 if not already in
                         t2.addAttribute(new IDAttribute(t2key));
                     }
-
-                    att1 = (IDAttribute) t1.getAttributeByName(t1key);
-
-                    att2 = (IDAttribute) t2.getAttributeByName(t2key);
 
                     RelationshipType type = null;
 
@@ -288,7 +320,7 @@ public class SchemaBuilder {
                         throw new NoSuchCardinalityException(cardinality + " is not a valid cardinality. Check the cardinality csv. Valid options are \"To1\" and \"ToN\".");
                     }
 
-                    Relationship r = new Relationship(t1, t2, att1 , att2, type);
+                    Relationship r = new Relationship(t1, t2, (IDAttribute)t1Att , (IDAttribute)t2Att, type);
 
                     t1.addRelationship(r);
 
@@ -448,17 +480,41 @@ public class SchemaBuilder {
         System.out.println("PKs for "+t.getName()+" are "+tablePkNames.toString());
 
         for(String attributeName: attributeNames) {
-            if(tableContainsAttribute(t,"["+attributeName+"]")) {
+
+            HashMap<String,Integer> values = t.getRowSample().get(attributeName);
+
+            Attribute att = t.getAttrbuteByNameIgnoreCase("["+attributeName+"]");
+
+            if(att!=null) {
+                if(att instanceof NominalAttribute) {
+                    if(((NominalAttribute) att).getImportantValues()==null) {
+
+                        int count = 0;
+
+                        for(String key:values.keySet()) {
+                            count+=values.get(key);
+                        }
+
+                        ((NominalAttribute) att).setImportantValues(getNominalBins(values,count));
+                    }
+                } else if(att instanceof NumericAttribute) {
+                    if(((NumericAttribute) att).getBinThresholds()==null) {
+                        int count = 0;
+
+                        for(String key:values.keySet()) {
+                            count+=values.get(key);
+                        }
+                        ((NumericAttribute) att).setBinThresholds(getNumericBins(values));
+                    }
+                }
+                System.out.println(attributeName+" is already in the table");
                 continue;
             }
 
-
-
+            //being testing for attribute type
             boolean isNumeric = true;
             boolean isBinary = true;
             boolean isTimeStamp = true;
-
-            HashMap<String,Integer> values = t.getRowSample().get(attributeName);
 
             int numRows = 0;
 
@@ -493,52 +549,55 @@ public class SchemaBuilder {
 
             attributeName = "["+attributeName+"]";
 
-            int numUniqueValues = values.keySet().size();
-
-            //System.out.println("for "+attributeName+" there are "+numRows + " rows "+ " and "+numUniqueValues + " unique values.");
-
-            if(isBinary) {
+            if(isBinary) { //add binary attribute to table
                 t.addAttribute(new ZeroOneAttribute(attributeName));
-            } else if(isTimeStamp) {
+            } else if(isTimeStamp) { //add timestamp attribute to table
                 //TODO calculate bins
                 t.addAttribute(new TimeStampAttribute(attributeName,presetPeriods));
-            } else if(isNumeric) {
+            } else if(isNumeric) { //add numeric attribute to table
                 //TODO calculate bins
-                ArrayList<Double> numericBins = new ArrayList<>();
-
-                //simple method to create 10 bins, each 1/10th of the max - min value
-                double max = Double.MIN_VALUE;
-                double min = Double.MAX_VALUE;
-
-                double valueD;
-                for(String value: values.keySet()) {
-                    valueD = Double.parseDouble(value);
-                    if(valueD>max) {
-                        max = valueD;
-                    }
-
-                    if(valueD<min) {
-                        min = valueD;
-                    }
-                }
-
-                double increment = Math.abs((max-min))/10.0d;
-                for(int i=0;i<10;i++) {
-                    numericBins.add(min + (increment*i));
-                }
-
-                t.addAttribute(new NumericAttribute(attributeName,null,numericBins));
-            } else {
+                t.addAttribute(new NumericAttribute(attributeName,null,getNumericBins(values)));
+            } else { //add nominal attribute to table as default
                 //TODO what to do if nothing is common enough to be an important value?
-                ArrayList<String> nominalBins = new ArrayList<>();
-                for(String value: values.keySet()) {
-                    if(values.get(value)>(double)numRows*0.00d) {
-                        nominalBins.add(value);
-                    }
-                }
-                t.addAttribute(new NominalAttribute(attributeName,null,nominalBins));
+                t.addAttribute(new NominalAttribute(attributeName,null,getNominalBins(values,numRows)));
             }
         }
+    }
+
+    public ArrayList<String> getNominalBins(HashMap<String, Integer> values, int numRows) {
+        ArrayList<String> nominalBins = new ArrayList<>();
+        for(String value: values.keySet()) {
+            if(values.get(value)>(double)numRows*0.00d) {
+                nominalBins.add(value);
+            }
+        }
+        return nominalBins;
+    }
+
+    public ArrayList<Double> getNumericBins(HashMap<String, Integer> values) {
+        ArrayList<Double> numericBins = new ArrayList<>();
+
+        //simple method to create 10 bins, each 1/10th of the max - min value
+        double max = Double.MIN_VALUE;
+        double min = Double.MAX_VALUE;
+
+        double valueD;
+        for(String value: values.keySet()) {
+            valueD = Double.parseDouble(value);
+            if(valueD>max) {
+                max = valueD;
+            }
+
+            if(valueD<min) {
+                min = valueD;
+            }
+        }
+
+        double increment = Math.abs((max-min))/10.0d;
+        for(int i=0;i<10;i++) {
+            numericBins.add(min + (increment*i));
+        }
+        return numericBins;
     }
 
     public boolean isUnique(String attName, Table t) throws Exception {
@@ -547,7 +606,7 @@ public class SchemaBuilder {
         return diff==0 ? true : false;
     }
 
-    public boolean tableContainsAttribute(Table t, String attName) {
+    private boolean tableContainsAttribute(Table t, String attName) {
         for(Attribute att: t.getAttributes()) {
             if(att.getAttributeName().equalsIgnoreCase(attName)) {
                 return true;
@@ -563,6 +622,10 @@ public class SchemaBuilder {
             }
         }
         return false;
+    }
+
+    private String encloseInBrackets(String s) {
+        return "["+s+"]";
     }
 
 }

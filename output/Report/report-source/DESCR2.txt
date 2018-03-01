@@ -1,1 +1,1 @@
-The SUM [Cocoa_Percent] among the previous BinarizedRatings of the Company where WHERE t2.[Broad Bean_Origin] = Trinidad
+The AVG [Review_Date] among the previous BinarizedRatings of the Company where WHERE t2.[Cocoa_Percent] > 0.768 AND t2.[Cocoa_Percent] <= 0.8260000000000001

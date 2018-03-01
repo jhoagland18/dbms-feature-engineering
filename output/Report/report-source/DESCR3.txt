@@ -1,1 +1,1 @@
-The AVG [Rating] among the previous BinarizedRatings of the Company where WHERE t2.[Cocoa_Percent] > 0.768 AND t2.[Cocoa_Percent] <= 0.8260000000000001
+The AVG [NewRating] among the previous BinarizedRatings of the Company where WHERE t2.[Broad Bean_Origin] = Bolivia

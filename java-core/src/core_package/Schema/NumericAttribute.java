@@ -17,6 +17,13 @@ public class NumericAttribute extends Attribute {
 	public ArrayList<Double> getBinThresholds() {
 		return binThresholds;
 	}
+
+	/**
+	 * @param binThresholds
+	 */
+	public void setBinThresholds(ArrayList<Double> binThresholds) {
+
+	}
 	
 	/**
 	 * 
