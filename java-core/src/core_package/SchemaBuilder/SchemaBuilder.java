@@ -1,16 +1,13 @@
 package core_package.SchemaBuilder;
-import alice.tuprolog.Int;
 import core_package.Environment;
-import core_package.Exception.NoPrimaryKeyIdentifiedException;
+import core_package.Exception.NoPrimaryKeyException;
 import core_package.Exception.NoSuchCardinalityException;
 import core_package.Exception.NoSuchDatabaseTypeException;
 import core_package.Exception.NoSuchTableException;
 import core_package.Schema.*;
-import org.w3c.dom.Attr;
 
 import javax.naming.directory.NoSuchAttributeException;
 import java.io.*;
-import java.lang.reflect.Constructor;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.ParseException;
@@ -20,62 +17,37 @@ import java.util.*;
 
 public class SchemaBuilder {
 
-    private ArrayList<Double> presetBins = new ArrayList<Double>();
-    private ArrayList<String> presetImportantValues = new ArrayList<>();
-    private ArrayList<Period> presetPeriods = new ArrayList<>();
-
+    //strings to match in the relationships and table csv files
     private static String ATTRIBUTE_TYPE_ID = "id";
     private static String ATTRIBUTE_TYPE_NOMINAL = "nominal";
     private static String ATTRIBUTE_TYPE_NUMERIC = "numeric";
     private static String ATTRIBUTE_TYPE_ZEROONE = "zeroone";
     private static String ATTRIBUTE_TYPE_TIMESTAMP = "timestamp";
 
-    //database data types
-
-    //numeric data types
-    protected static String DATA_TYPE_INT = "int";
-    protected static String DATA_TYPE_BIG_INT = "bigint";
-    protected static String DATA_TYPE_BIT_INT = "bit";
-    protected static String DATA_TYPE_SMALL_INT = "smallint";
-    protected static String DATA_TYPE_TINY_INT = "tinyint";
-    protected static String DATA_TYPE_DECIMAL = "decimal";
-    protected static String DATA_TYPE_MONEY = "money";
-    protected static String DATA_TYPE_NUMERIC = "numeric";
-    protected static String DATA_TYPE_FLOAT = "float";
-    protected static String DATA_TYPE_REAL = "real";
-    protected static final Set<String> DATA_TYPES_NUMERIC = new HashSet<String>(Arrays.asList(
-            new String[] {DATA_TYPE_INT, DATA_TYPE_BIG_INT, DATA_TYPE_SMALL_INT, DATA_TYPE_TINY_INT,
-            DATA_TYPE_BIT_INT, DATA_TYPE_DECIMAL, DATA_TYPE_MONEY, DATA_TYPE_NUMERIC, DATA_TYPE_FLOAT, DATA_TYPE_REAL}));
-
-    //string data types
-    protected static String DATA_TYPE_CHAR = "char";
-    protected static String DATA_TYPE_VARCHAR = "varchar";
-    protected static String DATA_TYPE_TEXT = "text";
-    protected static String DATA_TYPE_NTEXT = "ntext";
-    protected static final Set<String> DATA_TYPES_TEXT = new HashSet<String>(Arrays.asList(
-            new String[] {DATA_TYPE_CHAR, DATA_TYPE_VARCHAR, DATA_TYPE_TEXT, DATA_TYPE_NTEXT}));
-
-    //time data types
-    protected static String DATA_TYPE_TIME = "time";
-    protected static String DATA_TYPE_DATETIME = "datetime";
-    protected static String DATA_TYPE_DATE = "date";
-    protected static final Set<String> DATA_TYPES_TIME = new HashSet<String>(Arrays.asList(
-            new String[]{DATA_TYPE_TIME, DATA_TYPE_DATETIME, DATA_TYPE_DATE}));
-
+    //set a custom delimiter here
     private static String delimiter = "@@@";
 
     private Schema schema;
+
     private DatabaseConnection conn;
 
     public SchemaBuilder() {
         schema = new Schema();
     }
 
+    /**
+     * @param connectionType should be a static string from the DatabaseConnection class of the desired database type
+     * @throws NoSuchDatabaseTypeException
+     */
     public SchemaBuilder(String connectionType) throws NoSuchDatabaseTypeException {
         this();
         conn = DatabaseConnection.getConnectionForDBType(connectionType);
     }
 
+    /**
+     * @param connectionType
+     * @throws NoSuchDatabaseTypeException
+     */
     public void setConnectionType(String connectionType) throws NoSuchDatabaseTypeException {
         conn = DatabaseConnection.getConnectionForDBType(connectionType);
     }
@@ -89,18 +61,26 @@ public class SchemaBuilder {
         return schema;
     }
 
+    /**
+     * @return returns this for chaining
+     * @throws Exception
+     */
     public SchemaBuilder buildSchema() throws Exception {
 
+        //reads relationships csv, creates tables if they don't already exist, and adds key attributes to db
         loadRelationships();
 
         for(Table t: schema.getTables()) {
+            //sample X random rows for attribute type identification
             sampleRowsForTable(t,5000);
         }
 
-        for(Table t: schema.getTables()) { //iterates through tables and adds attributes and primary keys
+        for(Table t: schema.getTables()) {
+            //Determines attribute type from the sampled rows, generates bins, and adds attribute to table
             addAttributesToTable(t);
         }
 
+        //write tables to csv files
         for(Table t: schema.getTables()) {
             writeTableAttributes(t);
         }
@@ -110,114 +90,122 @@ public class SchemaBuilder {
 
     public SchemaBuilder loadSchema() throws Exception {
 
+        //reads relationships csv, creates tables if they don't already exist, and adds key attributes to db
         loadRelationships();
 
+        //reads each table csv in the tables/ directory, adds each table to schema, and adds each attribute in the csv to the table.
         loadTables();
 
         return this;
     }
 
     private void loadTables() throws Exception {
-
-        ArrayList<String> tableNames = new ArrayList<>();
-        for(Table t:this.getSchema().getTables()) {
-            tableNames.add(t.getName());
-        }
-
+        //dir of table files
         File tablesDir = new File("schema\\tables");
+
+        //list of filenames
         File[] tableFiles = tablesDir.listFiles();
 
         BufferedReader br;
         String line = "";
-        //String csvDelimiter = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
 
         if (tableFiles != null) {
 
+            //load attributes from table csv into table
             for (File tableFile : tableFiles) {
                 br = new BufferedReader(new FileReader(tableFile.getAbsolutePath()));
 
                 String nameWithExt = tableFile.getName();
-                String nameWithoutExt = nameWithExt.substring(0,nameWithExt.lastIndexOf("."));
+                String nameWithoutExt = nameWithExt.substring(0,nameWithExt.lastIndexOf(".")); //truncate name at last '.' to remove file extension
                 Table t = this.getSchema().getTableByName(nameWithoutExt);
 
+                //read each line in table csv
                 while ((line = br.readLine()) != null) {
-                    String[] data = line.split(delimiter,-1);
-                    System.out.println("line " +Arrays.toString(data));
-                    System.out.println(data[0]);
+                    String[] data = line.split(delimiter, -1);
                     String attName = data[0];
                     String attType = data[1];
 
-                    if(attName.startsWith("\"") && attName.endsWith("\"")) {
+                    //unescape if attName is escaped
+                    if (attName.startsWith("\"") && attName.endsWith("\"")) {
                         attName.substring(1);
-                        attName.substring(0,attName.length());
+                        attName.substring(0, attName.length());
                     }
+
                     ArrayList<String> attBins = new ArrayList<>();
 
+                    //add bins to bin arraylist
                     for (int i = 2; i < data.length; i++) {
                         attBins.add(data[i]);
                     }
 
                     Attribute newAtt = null;
 
-                    if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_ID)) {
+                    //determine type of attribute and create instance to add to table later
+                    if (attType.equalsIgnoreCase(ATTRIBUTE_TYPE_ID)) {
                         continue;
-//                        newAtt = new IDAttribute(attName);
-                    } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NOMINAL)) {
-                        newAtt = new NominalAttribute(attName,null,attBins);
-                    } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NUMERIC)) {
+                    } else if (attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NOMINAL)) {
+                        newAtt = new NominalAttribute(attName, null, attBins);
+                    } else if (attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NUMERIC)) {
                         ArrayList<Double> doubleBins = new ArrayList<>();
-                        for(String s:attBins) {
+                        for (String s : attBins) {
                             doubleBins.add(Double.parseDouble(s));
                         }
-                        newAtt = new NumericAttribute(attName,null,doubleBins);
-                    } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_TIMESTAMP)) {
+                        newAtt = new NumericAttribute(attName, null, doubleBins);
+                    } else if (attType.equalsIgnoreCase(ATTRIBUTE_TYPE_TIMESTAMP)) {
                         ArrayList<Period> periodBins = new ArrayList<>();
-                        for(String s:attBins) {
+                        for (String s : attBins) {
                             periodBins.add(Period.parse(s));
                         }
-                        newAtt = new TimeStampAttribute(attName,periodBins);
-                    } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_ZEROONE)) {
+                        newAtt = new TimeStampAttribute(attName, periodBins);
+                    } else if (attType.equalsIgnoreCase(ATTRIBUTE_TYPE_ZEROONE)) {
                         newAtt = new ZeroOneAttribute(attName);
                     }
 
-                    if(newAtt==null) {
-                        System.out.println("newatt is "+newAtt+" "+attName+ " type: "+attType);
+                    Attribute existingAtt = t.getAttrbuteByNameIgnoreCase(attName);
+
+                    if (existingAtt == null) { //if attribute is not already in table, add attribute
+                        t.addAttribute(newAtt);
+                    } else { //if attribute is already in table (was added when loading relationships), copy the new bins into the attribute
+                        if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NOMINAL)) {
+                            ((NominalAttribute)existingAtt).setImportantValues(((NominalAttribute)newAtt).getImportantValues());
+                        } else if(attType.equalsIgnoreCase(ATTRIBUTE_TYPE_NUMERIC)) {
+                            ((NumericAttribute)existingAtt).setBinThresholds(((NumericAttribute)newAtt).getBinThresholds());
+                        }
                     }
-
-                    t.addAttribute(newAtt);
                 }
-
-
             }
+
         } else {
             // Handle the case where dir is not really a directory.
-            // Checking dir.isDirectory() above would not be sufficient
-            // to avoid race conditions with another process that deletes
-            // directories.
+            //TODO
         }
     }
 
     private void loadRelationships() throws Exception {
+        //relatonships csv filepath
         String filePath = "schema\\relationships.csv";
 
         BufferedReader br = null;
         String line = "";
-        String csvDelimiter = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
+        String csvDelimiter = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"; //regex to check for unescaped commas (matches an even number of following double quotes)
 
         try {
             br = new BufferedReader(new FileReader(filePath));
 
+            //read each line in relationships.csv
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(csvDelimiter,-1);
                 String t1Name = data[0];
                 String t2Name = data[1];
-                boolean t1keyIsPk = data[2].startsWith("#") && data[2].endsWith("#");
-                boolean t2keyIsPk = data[3].startsWith("#") && data[3].endsWith("#");
-                if(t1keyIsPk) {
+                boolean t1keyIsPk = data[2].startsWith("#") && data[2].endsWith("#"); //flag indicating table 1 key is a primary key
+                boolean t2keyIsPk = data[3].startsWith("#") && data[3].endsWith("#"); //flag indicating table 2 key is a primary key
+
+                if(t1keyIsPk) { //remove flag characters from table 1 key
                     data[2] = data[2].substring(1);
                     data[2] = data[2].substring(0,data[2].length()-1);
                 }
-                if(t2keyIsPk) {
+
+                if(t2keyIsPk) { //remove flag characters from table 2 key
                     data[3] = data[3].substring(1);
                     data[3] = data[3].substring(0,data[3].length()-1);
                 }
@@ -225,11 +213,13 @@ public class SchemaBuilder {
                 String t1key = encloseInBrackets(data[2]);
                 String t2key = encloseInBrackets(data[3]);
 
+                //cardinality flag
                 String cardinality = data[4];
 
                 try {
                     Table t1 = schema.getTableByName(t1Name);
 
+                    //if table 1 not in schema, create and add table to schema
                     if(t1==null) {
                         t1 = new Table(t1Name);
                         schema.addTable(t1);
@@ -237,6 +227,7 @@ public class SchemaBuilder {
 
                     Table t2 = schema.getTableByName(t2Name);
 
+                    //if table 2 not in schema, create and add table to schema
                     if(t2==null) {
                         t2 = new Table(t2Name);
                         schema.addTable(t2);
@@ -244,44 +235,47 @@ public class SchemaBuilder {
 
                     Attribute t1Att, t2Att;
 
+                    //determine Table 1 key attribute type and create instance to add to table later
                     if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL))) {
-                        t1Att = new NominalAttribute(t1Name,null,null);
-                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                        t1key = t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                        t1Att = new NominalAttribute(t1key,null,null);
                     } else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC))) {
-                        t1Att = new NumericAttribute(t1Name,null,null);
-                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                        t1key = t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                        t1Att = new NumericAttribute(t1key,null,null);
                     } else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP))) {
-                        t1Att = new TimeStampAttribute(t1Name,new ArrayList<Period>());
-                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                        t1key = t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                        t1Att = new TimeStampAttribute(t1key,new ArrayList<Period>());
                     }  else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE))) {
-                        t1Att = new ZeroOneAttribute(t1Name);
-                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                        t1key = t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                        t1Att = new ZeroOneAttribute(t1key);
                     } else if(t1key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ID))) {
-                        t1Att = new IDAttribute(t1Name);
-                        t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                        t1key = t1key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                        t1Att = new IDAttribute(t1key);
                     } else {
                         t1Att = new IDAttribute(t1key);
                     }
 
+                    //determine Table 2 key attribute type and create instance to add to table later
                     if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL))) {
-                        t2Att = new NominalAttribute(t2Name,null,null);
-                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                        t2key = t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                        t2Att = new NominalAttribute(t1key,null,null);
                     } else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC))) {
-                        t2Att = new NumericAttribute(t2Name,null,null);
-                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                        t2key = t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                        t2Att = new NumericAttribute(t1key,null,null);
                     } else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP))) {
-                        t2Att = new TimeStampAttribute(t2Name,new ArrayList<Period>());
-                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                        t2key = t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                        t2Att = new TimeStampAttribute(t1key,new ArrayList<Period>());
                     }  else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE))) {
-                        t2Att = new ZeroOneAttribute(t2Name);
-                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                        t2key = t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                        t2Att = new ZeroOneAttribute(t1key);
                     } else if(t2key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ID))) {
-                        t2Att = new IDAttribute(t2Name);
-                        t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                        t2key = t2key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                        t2Att = new IDAttribute(t1key);
                     } else {
                         t2Att = new IDAttribute(t2key);
                     }
 
+                    //if Table 1 has no primary key and table 1 key is flagged as primary, set table 1 key as primary key. Else if table 1 key is flagged as pk and table doesn't contain this key already, add as pk to table
                     if(t1.getPrimaryKey().size()==0 && t1keyIsPk) {
                         t1.setPrimaryKey(t1Att);
                     } else if(t1keyIsPk && !tableContainsPrimaryKey(t1,t1key)){
@@ -292,6 +286,7 @@ public class SchemaBuilder {
                         }
                     }
 
+                    //if Table 2 has no primary key and table 2 key is flagged as primary, set table 2 key as primary key. Else if table 2 key is flagged as pk and table doesn't contain this key already, add as pk to table
                     if(t2.getPrimaryKey().size()==0 && t2keyIsPk) {
                         t2.setPrimaryKey(t2Att);
                     } else if(t2keyIsPk && !tableContainsPrimaryKey(t2,t2key)){
@@ -302,16 +297,17 @@ public class SchemaBuilder {
                         }
                     }
 
-                    if(!tableContainsAttribute(t1,t1key)) { //add fk to t2 if not already in
-                        t1.addAttribute(new IDAttribute(t1key));
+                    if(!t1keyIsPk && !tableContainsAttribute(t1,t1key)) { //Add table 1 key to table 1 if not a primary key and not already in
+                        t1.addAttribute(t1Att);
                     }
 
-                    if(!tableContainsAttribute(t2,t2key)) { //add fk to t2 if not already in
-                        t2.addAttribute(new IDAttribute(t2key));
+                    if(!t2keyIsPk && !tableContainsAttribute(t2,t2key)) { //Add table 2 key to table 2 if not a primary key and not already in
+                        t2.addAttribute(t2Att);
                     }
 
                     RelationshipType type = null;
 
+                    //determine cardinality
                     if (cardinality.equalsIgnoreCase("ToN")) {
                         type = RelationshipType.ToN;
                     } else if (cardinality.equalsIgnoreCase("To1")) {
@@ -320,11 +316,10 @@ public class SchemaBuilder {
                         throw new NoSuchCardinalityException(cardinality + " is not a valid cardinality. Check the cardinality csv. Valid options are \"To1\" and \"ToN\".");
                     }
 
-                    Relationship r = new Relationship(t1, t2, (IDAttribute)t1Att , (IDAttribute)t2Att, type);
+                    Relationship r = new Relationship(t1, t2, t1Att , t2Att, type);
 
+                    //add relationship to table 1
                     t1.addRelationship(r);
-
-
                 } catch (NoSuchTableException e) {
                     e.printStackTrace();
                 }
@@ -333,11 +328,33 @@ public class SchemaBuilder {
             e.printStackTrace();
         }
 
+        //get the target table, and then add the target table's primary key to target table if not already in
         for(Table t:this.getSchema().getTables()) {
             if(t.getName().equalsIgnoreCase(Environment.targetTableName)) {
-                if(!tableContainsPrimaryKey(t,"["+Environment.targetTablePK+"]")) {
+                if(!tableContainsPrimaryKey(t,encloseInBrackets(Environment.targetTablePK))) {
+                    String key = encloseInBrackets(Environment.targetTablePK);
+                    Attribute pkatt = null;
+                    if(key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL))) {
+                        key = key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NOMINAL),"");
+                        pkatt = new NominalAttribute(key,null,null);
+                    } else if(key.contains(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC))) {
+                        key = key.replace(encloseInBrackets(ATTRIBUTE_TYPE_NUMERIC),"");
+                        pkatt = new NumericAttribute(key,null,null);
+                    } else if(key.contains(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP))) {
+                        key = key.replace(encloseInBrackets(ATTRIBUTE_TYPE_TIMESTAMP),"");
+                        pkatt = new TimeStampAttribute(key,new ArrayList<Period>());
+                    }  else if(key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE))) {
+                        key = key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ZEROONE),"");
+                        pkatt = new ZeroOneAttribute(key);
+                    } else if(key.contains(encloseInBrackets(ATTRIBUTE_TYPE_ID))) {
+                        key = key.replace(encloseInBrackets(ATTRIBUTE_TYPE_ID),"");
+                        pkatt = new IDAttribute(key);
+                    } else {
+                        pkatt = new IDAttribute(key);
+                    }
+
                     ArrayList<Attribute> pks = t.getPrimaryKey();
-                    pks.add(new IDAttribute("[" + Environment.targetTablePK+"]"));
+                    pks.add(pkatt);
                     t.setPrimaryKey(pks);
                 }
                 break;
@@ -345,21 +362,32 @@ public class SchemaBuilder {
         }
     }
 
-    private void writeTableAttributes(Table t) throws NoSuchAttributeException, IOException {
-        ArrayList<String> pknames = new ArrayList<>();
+    /**
+     * Creates a file for the table specified. Writes the information of each attribute, one per line, in the csv format attname,atttype,bin 1,bin 2,bin n-1,bin n
+     * @param t
+     * @throws NoSuchAttributeException
+     * @throws IOException
+     * @throws NoPrimaryKeyException
+     */
+    private void writeTableAttributes(Table t) throws NoSuchAttributeException, IOException, NoPrimaryKeyException {
         String out = "";
         if(t.getPrimaryKey().isEmpty()) {
-            System.out.println("PK for "+t.getName()+" is EMPTY!!!");
-        }
-        for(Attribute att: t.getPrimaryKey()) {
-            out+=att.getAttributeName()+delimiter+"id\n";
-            pknames.add(att.getAttributeName());
+            throw new NoPrimaryKeyException("No primary key is set for table "+t.getName()+". Make sure to indicate primary key in relationships.csv by both prepending and appending \'#\' to the attribute name." +
+                    "\nIf the table missing a primary key is the target table, make sure the target table primary key is listed.");
         }
 
-        for(Attribute att: t.getAttributes()) {
+        //load all attributes from table
+        ArrayList<Attribute> allAtts = new ArrayList<>();
+        allAtts.addAll(t.getPrimaryKey());
+        allAtts.addAll(t.getAttributes());
 
+        //write attribute to table csv
+        for(Attribute att: allAtts) {
+
+            //flag indicating if attribute is already in table
             boolean attInTable = false;
 
+            //determine if user defined attribute name matches an attribute from the table in the database
             for(String attName: t.getRowSample().keySet()) {
                 attName = "["+attName+"]";
                 if(attName.equalsIgnoreCase(att.getAttributeName())) {
@@ -369,24 +397,15 @@ public class SchemaBuilder {
 
             }
 
+            //throw exception if attribute is not in database table. User probably spelled something wrong or made some other mistake.
             if(!attInTable) {
                 throw new NoSuchAttributeException("Attribute " + att.getAttributeName() + " could not be found in table " + t.getName() + ". Check the spelling in the relationships csv and try again");
             }
 
-            boolean ispk = false;
-            for(String pkname:pknames) {
-                if(pkname.equalsIgnoreCase(att.getAttributeName())) {
-                    ispk = true;
-                    break;
-                }
-            }
-
-            if(ispk) {
-                continue;
-            }
-
+            //start building line to print
             out+=att.getAttributeName()+delimiter;
 
+            //append attribute type as string and bins (if applicable) to line
             if(att instanceof NominalAttribute) {
                 out+=ATTRIBUTE_TYPE_NOMINAL;
                 //bins
@@ -415,10 +434,12 @@ public class SchemaBuilder {
             out+="\n";
         }
 
+        //create file
         File tableFile = new File("schema\\tables\\"+t.getName()+".csv\\");
         tableFile.getParentFile().mkdirs();
         tableFile.createNewFile();
 
+        //write line
         FileWriter writer = new FileWriter(tableFile);
         writer.write(out);
         writer.close();
@@ -428,31 +449,36 @@ public class SchemaBuilder {
     private void sampleRowsForTable(Table t, int numToSample) throws Exception {
         HashMap<String, HashMap<String,Integer>> sampleRows = new HashMap<>();
 
+        //executes premade query to select attribute names and datatype for table
         ResultSet rs = conn.query(conn.buildSQLToGetTableAttributeNameAndDatatype(t.getName())); //col 1 is name, col 2 is data type
 
+        //insert attribute names into hashmap
         while(rs.next()) {
             sampleRows.put(rs.getString(1),new HashMap<String,Integer>());
         }
 
         ArrayList<String> attNames = new ArrayList<>();
         for(String s: sampleRows.keySet()) {
-            System.out.print(" "+s);
             attNames.add(s);
         }
-        System.out.println();
 
+        //create statement and execute query to select random X rows of table attributes
         Statement stmt = conn.getConnection().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
         ResultSet tableSample = conn.query(conn.buildSQLToGetTopXRowsOfTableByNewID(attNames,numToSample,t),stmt);
 
-        int col = 2; //1 is newID
-        for(int i=0; i<attNames.size();i++) { //iterate through att names
+        int col = 2; //index 1 is newID
+
+        //iterate over attribute names, adding a hashmap of values and occurances of the value to the table's attribute hashmap
+        for(int i=0; i<attNames.size();i++) {
             HashMap<String,Integer> values = new HashMap<>();
             tableSample.first();
+
+            //iterate over rows in resultset
             while(tableSample.next()) {
                 String key = tableSample.getString(col);
                 if(values.containsKey(key)) {
-                    values.put(key,values.get(key)+1);
+                    values.put(key,values.get(key)+1); //increment occurances of value
                 } else {
                     values.put(key,1);
                 }
@@ -461,6 +487,7 @@ public class SchemaBuilder {
             col++;
         }
 
+        //store sampled data
         t.setRowSample(sampleRows);
     }
 
@@ -477,7 +504,6 @@ public class SchemaBuilder {
             tablePkNames.add(a.getAttributeName());
         }
 
-        System.out.println("PKs for "+t.getName()+" are "+tablePkNames.toString());
 
         for(String attributeName: attributeNames) {
 
@@ -507,7 +533,6 @@ public class SchemaBuilder {
                         ((NumericAttribute) att).setBinThresholds(getNumericBins(values));
                     }
                 }
-                System.out.println(attributeName+" is already in the table");
                 continue;
             }
 
@@ -553,7 +578,7 @@ public class SchemaBuilder {
                 t.addAttribute(new ZeroOneAttribute(attributeName));
             } else if(isTimeStamp) { //add timestamp attribute to table
                 //TODO calculate bins
-                t.addAttribute(new TimeStampAttribute(attributeName,presetPeriods));
+                t.addAttribute(new TimeStampAttribute(attributeName,new ArrayList<>()));
             } else if(isNumeric) { //add numeric attribute to table
                 //TODO calculate bins
                 t.addAttribute(new NumericAttribute(attributeName,null,getNumericBins(values)));

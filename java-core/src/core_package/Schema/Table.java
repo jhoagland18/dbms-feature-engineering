@@ -1,6 +1,7 @@
 package core_package.Schema;
 
 import org.omg.CORBA.NameValuePair;
+import org.w3c.dom.Attr;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -55,7 +56,10 @@ public class Table {
 	 * @return the attribute with that name
 	 */
 	public Attribute getAttrbuteByNameIgnoreCase(String name) {
-		for(Attribute att: attributes) {
+		ArrayList<Attribute> allAtts = new ArrayList<>();
+		allAtts.addAll(attributes);
+		allAtts.addAll(primaryKey);
+		for(Attribute att: allAtts) {
 			if(att.getAttributeName().equalsIgnoreCase(name)) {
 				return att;
 			}
@@ -151,8 +155,8 @@ public class Table {
 	public void setPrimaryKey(ArrayList<Attribute> attributesList ) throws Exception  {
 		this.primaryKey = new ArrayList<>();
 		for (Attribute att : attributesList) {
-			if (att.getClass() != IDAttribute.class)
-				throw new Exception("Attribute " + att.getAttributeName() + " cannot be part of a primary key because it is not of type ID");
+//			if (att.getClass() != IDAttribute.class)
+//				throw new Exception("Attribute " + att.getAttributeName() + " cannot be part of a primary key because it is not of type ID");
 			primaryKey.add(att);
 		}
 	}

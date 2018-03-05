@@ -7,8 +7,8 @@ public class Relationship {
 
 	private Table table1;
 	private Table table2;
-	private ArrayList<IDAttribute> attributes1;
-	private ArrayList<IDAttribute> attributes2;
+	private ArrayList<Attribute> attributes1;
+	private ArrayList<Attribute> attributes2;
 	private RelationshipType type;
 	
 	/**
@@ -27,13 +27,13 @@ public class Relationship {
 	 * 
 	 * @return the attributes of table 1 used for the join
 	 */
-	public ArrayList<IDAttribute> getAttributes1() {return attributes1;}
+	public ArrayList<Attribute> getAttributes1() {return attributes1;}
 
 	/**
 	 * 
 	 * @return the attributes of table 2 used for the join
 	 */
-	public ArrayList<IDAttribute> getAttributes2() {return attributes2;}
+	public ArrayList<Attribute> getAttributes2() {return attributes2;}
 	
 	/**
 	 * 
@@ -49,7 +49,7 @@ public class Relationship {
 	 * @param attribute2 the key used for the join in table2
 	 * @param relType the relationship type
 	 */
-	public Relationship (Table table1, Table table2, IDAttribute attribute1,IDAttribute attribute2, RelationshipType relType) {
+	public Relationship (Table table1, Table table2, Attribute attribute1,Attribute attribute2, RelationshipType relType) {
 		
 		this.attributes1=new ArrayList<>();
 		this.attributes1.add(attribute1);
@@ -70,7 +70,7 @@ public class Relationship {
 	 * @param attributes2 the keys used for the joins in table2
 	 * @param relType the relationship type
 	 */
-	public Relationship (Table table1, Table table2, ArrayList<IDAttribute> attributes1,ArrayList<IDAttribute> attributes2, RelationshipType relType) {
+	public Relationship (Table table1, Table table2, ArrayList<Attribute> attributes1,ArrayList<Attribute> attributes2, RelationshipType relType) {
 		this.attributes1=attributes1;
 		this.attributes2=attributes2;
 

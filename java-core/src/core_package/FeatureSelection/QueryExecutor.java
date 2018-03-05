@@ -53,20 +53,20 @@ public class QueryExecutor implements Runnable {
         for(Query q: queries) {
             numQueriesComplete++;
 
+            //update percentage complete
             if((numQueriesComplete%(queries.size()/8))==0 || numQueriesComplete==queries.size()) {
                 int numCompletedSinceLast = numQueriesComplete-numQueriesNotified;
                 queryExecutorController.submitProgress(numCompletedSinceLast);
                 numQueriesNotified = numQueriesComplete;
             }
-            // text manipulation
+
+            // prepare query text - removing quotes from prolog
             String sql = q.getSQL().substring(q.getSQL().indexOf("SELECT"));
             sql = sql.substring(0, sql.lastIndexOf('\''));
 
-            // run it
             ResultSet rs;
 
-            long startsqltime = System.nanoTime();
-
+            // run query
             try {
                 rs = conn.query(sql);
             } catch (Exception e) {
@@ -74,22 +74,19 @@ public class QueryExecutor implements Runnable {
                 continue;
             }
 
-            sqltime += System.nanoTime() - startsqltime;
-
-            long startcorrtodept = System.nanoTime();
+            //calculate feature correlation to dependant
             double corr = getCorrelationToDependant(rs,q);
 
+            //predictorValues is cleared and then populated in getCorrelationToDependant
             Set<String> keys = predictorValues.keySet();
-            ArrayList<String> keys2 = new ArrayList<>(keys);
 
             double absCorr = Math.abs(corr);
-            dependenttime += System.nanoTime() - startcorrtodept;
-            //System.out.println("SQL is "+q.getSQL());
-            System.out.println("Correlation is " + corr);
+            //System.out.println("SQL is "+q.getSQL()+"\nCorrelation is " + corr);
 
+            //throw out feature if it has too high of a correlation
             if (absCorr > Environment.highCorrelationWarningThreshold) {
                 System.out.println("This query has a high correlation. I'll discard it: \n" + sql);
-                continue; // run the next query
+                continue; // skip to the next feature/query
             }
 
             if (Double.isNaN(absCorr) ||  absCorr < Environment.minCorrelation)
@@ -104,17 +101,13 @@ public class QueryExecutor implements Runnable {
                 savedQueries.add(q);
             }
 
-            //            	//...
 //            	 For each saved attribute b:
 //            	       if |corr(a,b)| > th2:
 //            	            correlatedAttributeFound = true;
 //            	            keep only a or b, whichever is more correlated to target
-//            	            break
 //            	   if !correlatedAttributeFound:
 //            	       add a to the set of saved attributes
             // compute correlation vs every saved attribute
-
-            long featurecomparestart = System.nanoTime();
 
             int highestCorrIndex = 0;
             double highestCorr = 0.0;
@@ -133,8 +126,6 @@ public class QueryExecutor implements Runnable {
 
             }
 
-            featurecomparisontime += System.nanoTime() - featurecomparestart;
-
             if(correlatedAttributeFound) {
                 savedQueries.set(highestCorrIndex,q);
             } else {
@@ -143,12 +134,6 @@ public class QueryExecutor implements Runnable {
 
 
         }
-
-//        System.out.println("\nTotal work time for all features was "+(featurecomparisontime+sqltime+dependenttime)/1000000000.0+".\n"+
-//        "Calculating correlation to dependent took: "+dependenttime/1000000000.0+
-//                "\nCalculating correlation between selected features took: "+featurecomparisontime/1000000000.0
-//                +"\nSQL queries took: "+ sqltime/1000000000.0);
-
         queryExecutorController.addNewPotentialFeatures(savedQueries);
 
     }
