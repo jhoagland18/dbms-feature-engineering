@@ -41,6 +41,12 @@ public class DB2PrologLoader {
 			String clause = "pk('"+t.getName()+"',"+pks+").";
 			writer.println(clause);
 			
+			// add PKs as nominal
+			for (Attribute a : t.getPrimaryKey()) {
+				clause = "attribute(\'"+t.getName()+"\', \'"+a.getAttributeName()+"\', \'nominal\', \'null\').";
+				writer.println(clause);
+			}
+			
 			// scan all non-ID attributes of table t
 			for (Attribute a : t.getAttributes()) {
 				if (a.getClass() != IDAttribute.class) {
